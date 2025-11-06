@@ -890,6 +890,23 @@
                 transforms.push(cropParams.join(','));
             }
 
+            // Trim Effect (from Crop section) - Applied BEFORE gradient to trim the image first
+            const trimCheckbox = document.getElementById('trimCheckbox');
+            if (trimCheckbox && trimCheckbox.checked) {
+                // Build e_trim with optional parameters
+                let trimParams = ['e_trim'];
+                const tolerance = document.getElementById('trimTolerance').value;
+                const color = document.getElementById('trimColor').value;
+
+                if (tolerance || color) {
+                    let params = [];
+                    if (tolerance) params.push(tolerance);
+                    if (color) params.push(color);
+                    trimParams.push(params.join(':'));
+                }
+                transforms.push(trimParams.join(':'));
+            }
+
             // Gradient Fade - Multiple gradients support
             gradients.forEach(gradient => {
                 let gradientParams = [];
@@ -934,23 +951,6 @@
                     transforms.push(gradientParams.join(','));
                 }
             });
-
-            // Trim Effect (from Crop section)
-            const trimCheckbox = document.getElementById('trimCheckbox');
-            if (trimCheckbox && trimCheckbox.checked) {
-                // Build e_trim with optional parameters
-                let trimParams = ['e_trim'];
-                const tolerance = document.getElementById('trimTolerance').value;
-                const color = document.getElementById('trimColor').value;
-
-                if (tolerance || color) {
-                    let params = [];
-                    if (tolerance) params.push(tolerance);
-                    if (color) params.push(color);
-                    trimParams.push(params.join(':'));
-                }
-                transforms.push(trimParams.join(':'));
-            }
 
             // Effects
             const effectCheckboxes = document.querySelectorAll('.effect-checkbox input:checked');
