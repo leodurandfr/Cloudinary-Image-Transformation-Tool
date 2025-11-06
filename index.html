@@ -51,10 +51,22 @@
             padding: 30px;
         }
 
-        .controls-section, .preview-section {
+        .controls-section {
             display: flex;
             flex-direction: column;
             gap: 20px;
+        }
+
+        .preview-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .preview-sticky {
+            position: sticky;
+            top: 20px;
+            z-index: 10;
         }
 
         .card {
@@ -79,6 +91,42 @@
             height: 24px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border-radius: 2px;
+        }
+
+        .collapsible-header {
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+            padding: 5px 0;
+            transition: all 0.2s;
+        }
+
+        .collapsible-header:hover {
+            opacity: 0.8;
+        }
+
+        .collapsible-header .arrow {
+            transition: transform 0.3s ease;
+            font-size: 1.2rem;
+            color: #667eea;
+        }
+
+        .collapsible-header.collapsed .arrow {
+            transform: rotate(-90deg);
+        }
+
+        .collapsible-content {
+            max-height: 2000px;
+            overflow: hidden;
+            transition: max-height 0.3s ease, opacity 0.3s ease;
+            opacity: 1;
+        }
+
+        .collapsible-content.collapsed {
+            max-height: 0;
+            opacity: 0;
         }
 
         .input-group {
@@ -366,31 +414,40 @@
 
                 <!-- Crop Mode -->
                 <div class="card">
-                    <h2>Mode de recadrage</h2>
-                    <div class="input-group">
-                        <label for="cropMode">Crop Mode</label>
-                        <select id="cropMode" onchange="updateTransform()">
-                            <option value="">Aucun</option>
-                            <option value="fill">Fill - Remplir les dimensions</option>
-                            <option value="lfill">Limit Fill - Fill limité</option>
-                            <option value="crop">Crop - Rogner</option>
-                            <option value="thumb">Thumb - Miniature</option>
-                            <option value="auto">Auto - Automatique</option>
-                            <option value="scale">Scale - Redimensionner</option>
-                            <option value="fit">Fit - Ajuster</option>
-                            <option value="limit">Limit - Limiter</option>
-                            <option value="mfit">Min Fit - Ajustement minimum</option>
-                            <option value="pad">Pad - Avec padding</option>
-                            <option value="lpad">Limit Pad - Pad limité</option>
-                            <option value="mpad">Min Pad - Pad minimum</option>
-                        </select>
+                    <div class="collapsible-header" onclick="toggleCollapse(this)">
+                        <h2 style="margin-bottom: 0;">Mode de recadrage</h2>
+                        <span class="arrow">▼</span>
+                    </div>
+                    <div class="collapsible-content">
+                        <div class="input-group">
+                            <label for="cropMode">Crop Mode</label>
+                            <select id="cropMode" onchange="updateTransform()">
+                                <option value="">Aucun</option>
+                                <option value="fill">Fill - Remplir les dimensions</option>
+                                <option value="lfill">Limit Fill - Fill limité</option>
+                                <option value="crop">Crop - Rogner</option>
+                                <option value="thumb">Thumb - Miniature</option>
+                                <option value="auto">Auto - Automatique</option>
+                                <option value="scale">Scale - Redimensionner</option>
+                                <option value="fit">Fit - Ajuster</option>
+                                <option value="limit">Limit - Limiter</option>
+                                <option value="mfit">Min Fit - Ajustement minimum</option>
+                                <option value="pad">Pad - Avec padding</option>
+                                <option value="lpad">Limit Pad - Pad limité</option>
+                                <option value="mpad">Min Pad - Pad minimum</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Dimensions -->
                 <div class="card">
-                    <h2>Dimensions</h2>
-                    <div class="input-group">
+                    <div class="collapsible-header" onclick="toggleCollapse(this)">
+                        <h2 style="margin-bottom: 0;">Dimensions</h2>
+                        <span class="arrow">▼</span>
+                    </div>
+                    <div class="collapsible-content">
+                        <div class="input-group">
                         <label>Largeur & Hauteur (pixels)</label>
                         <div class="dimension-inputs">
                             <input 
@@ -418,20 +475,25 @@
                         </div>
                     </div>
 
-                    <div class="input-group">
-                        <label for="aspectRatio">Ratio personnalisé (ex: 1.5 ou 16:9)</label>
-                        <input 
-                            type="text" 
-                            id="aspectRatio" 
-                            placeholder="1.0 ou 16:9"
-                            onchange="updateTransform()"
-                        >
+                        <div class="input-group">
+                            <label for="aspectRatio">Ratio personnalisé (ex: 1.5 ou 16:9)</label>
+                            <input
+                                type="text"
+                                id="aspectRatio"
+                                placeholder="1.0 ou 16:9"
+                                onchange="updateTransform()"
+                            >
+                        </div>
                     </div>
                 </div>
 
                 <!-- Gravity -->
                 <div class="card">
-                    <h2>Gravité (point focal)</h2>
+                    <div class="collapsible-header" onclick="toggleCollapse(this)">
+                        <h2 style="margin-bottom: 0;">Gravité (point focal)</h2>
+                        <span class="arrow">▼</span>
+                    </div>
+                    <div class="collapsible-content">
                     <div class="input-group">
                         <label>Position compass</label>
                         <div class="gravity-grid">
@@ -458,11 +520,16 @@
                             <option value="auto:faces">Auto:Faces - Auto sur visages</option>
                         </select>
                     </div>
+                    </div>
                 </div>
 
                 <!-- Gradient -->
                 <div class="card">
-                    <h2>Gradient Fade</h2>
+                    <div class="collapsible-header" onclick="toggleCollapse(this)">
+                        <h2 style="margin-bottom: 0;">Gradient Fade</h2>
+                        <span class="arrow">▼</span>
+                    </div>
+                    <div class="collapsible-content">
                     <div class="input-group">
                         <label for="gradientType">Type de gradient</label>
                         <select id="gradientType" onchange="updateGradientVisibility(); updateTransform()">
@@ -512,20 +579,45 @@
                             </div>
                         </div>
 
+                        <div class="input-group" id="strengthControl" style="display: none;">
+                            <label for="gradientStrength">Force du mélange (Strength): <span id="gradientStrengthValue">20</span></label>
+                            <input
+                                type="range"
+                                id="gradientStrength"
+                                min="0"
+                                max="100"
+                                step="5"
+                                value="20"
+                                oninput="updateGradientValue('Strength'); updateTransform()"
+                                style="width: 100%;"
+                            >
+                            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #6c757d; margin-top: 5px;">
+                                <span>Faible (0)</span>
+                                <span>Défaut (20)</span>
+                                <span>Fort (100)</span>
+                            </div>
+                        </div>
+
                         <div style="background: #e7f3ff; padding: 12px; border-radius: 8px; font-size: 0.85rem; color: #004080; margin-top: 10px;">
                             <strong>💡 Astuce:</strong>
                             <ul style="margin: 8px 0 0 20px; line-height: 1.6;">
                                 <li>Valeurs positives: fade depuis le haut/gauche</li>
                                 <li>Valeurs négatives: fade depuis le bas/droite</li>
                                 <li>0.5 = 50% de l'image avec gradient</li>
+                                <li>Vous pouvez combiner X et Y pour des gradients symétriques</li>
                             </ul>
                         </div>
+                    </div>
                     </div>
                 </div>
 
                 <!-- Effects -->
                 <div class="card">
-                    <h2>Effets & Qualité</h2>
+                    <div class="collapsible-header" onclick="toggleCollapse(this)">
+                        <h2 style="margin-bottom: 0;">Effets & Qualité</h2>
+                        <span class="arrow">▼</span>
+                    </div>
+                    <div class="collapsible-content">
                     
                     <div class="toggle-section">
                         <div class="toggle-header" onclick="toggleSection('effects')">
@@ -589,13 +681,14 @@
                             <option value="auto">Auto</option>
                         </select>
                     </div>
+                    </div>
                 </div>
             </div>
 
             <!-- Preview Section -->
             <div class="preview-section">
                 <!-- Preview -->
-                <div class="card">
+                <div class="card preview-sticky">
                     <h2>Aperçu <span class="info-badge">Live</span></h2>
                     <div class="preview-container" id="previewContainer">
                         <div class="preview-placeholder">
@@ -729,7 +822,12 @@
                 } else if (gradientType === 'symmetric') {
                     gradientParams.push('e_gradient_fade:symmetric');
                 } else if (gradientType === 'symmetric_pad') {
-                    gradientParams.push('e_gradient_fade:symmetric_pad');
+                    const strength = document.getElementById('gradientStrength').value;
+                    if (strength && strength !== '20') {
+                        gradientParams.push(`e_gradient_fade:symmetric_pad:${strength}`);
+                    } else {
+                        gradientParams.push('e_gradient_fade:symmetric_pad');
+                    }
                 }
 
                 // Add X and Y parameters if set
@@ -846,9 +944,16 @@
         function updateGradientVisibility() {
             const gradientType = document.getElementById('gradientType').value;
             const gradientControls = document.getElementById('gradientControls');
+            const strengthControl = document.getElementById('strengthControl');
 
             if (gradientType && gradientType !== '') {
                 gradientControls.style.display = 'block';
+                // Show strength control only for symmetric_pad
+                if (gradientType === 'symmetric_pad') {
+                    strengthControl.style.display = 'block';
+                } else {
+                    strengthControl.style.display = 'none';
+                }
             } else {
                 gradientControls.style.display = 'none';
             }
@@ -857,6 +962,14 @@
         function updateGradientValue(axis) {
             const value = document.getElementById('gradient' + axis).value;
             document.getElementById('gradient' + axis + 'Value').textContent = value;
+        }
+
+        function toggleCollapse(header) {
+            const content = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+
+            header.classList.toggle('collapsed');
+            content.classList.toggle('collapsed');
         }
 
         function copyUrl() {
@@ -893,8 +1006,10 @@
             document.getElementById('gradientType').value = '';
             document.getElementById('gradientX').value = '0';
             document.getElementById('gradientY').value = '0';
+            document.getElementById('gradientStrength').value = '20';
             document.getElementById('gradientXValue').textContent = '0';
             document.getElementById('gradientYValue').textContent = '0';
+            document.getElementById('gradientStrengthValue').textContent = '20';
             document.getElementById('quality').value = '';
             document.getElementById('format').value = '';
             document.getElementById('dpr').value = '';
