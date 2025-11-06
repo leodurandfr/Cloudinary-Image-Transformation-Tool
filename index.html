@@ -524,8 +524,6 @@
                                 <option value="pad">Pad - Avec padding</option>
                                 <option value="lpad">Limit Pad - Pad limité</option>
                                 <option value="mpad">Min Pad - Pad minimum</option>
-                                <option value="imagga_crop">Imagga Crop - Recadrage intelligent AI</option>
-                                <option value="imagga_scale">Imagga Scale - Redimensionnement intelligent AI</option>
                             </select>
                         </div>
 
@@ -632,15 +630,15 @@
                     <div class="input-group">
                         <label>Position compass</label>
                         <div class="gravity-grid">
-                            <button class="gravity-btn" onclick="setGravity('north_west')">NW</button>
-                            <button class="gravity-btn" onclick="setGravity('north')">N</button>
-                            <button class="gravity-btn" onclick="setGravity('north_east')">NE</button>
-                            <button class="gravity-btn" onclick="setGravity('west')">W</button>
-                            <button class="gravity-btn" onclick="setGravity('center')">C</button>
-                            <button class="gravity-btn" onclick="setGravity('east')">E</button>
-                            <button class="gravity-btn" onclick="setGravity('south_west')">SW</button>
-                            <button class="gravity-btn" onclick="setGravity('south')">S</button>
-                            <button class="gravity-btn" onclick="setGravity('south_east')">SE</button>
+                            <button class="gravity-btn" onclick="setGravity('north_west')">↖ NW</button>
+                            <button class="gravity-btn" onclick="setGravity('north')">⬆ N</button>
+                            <button class="gravity-btn" onclick="setGravity('north_east')">↗ NE</button>
+                            <button class="gravity-btn" onclick="setGravity('west')">⬅ W</button>
+                            <button class="gravity-btn" onclick="setGravity('center')">⊙ C</button>
+                            <button class="gravity-btn" onclick="setGravity('east')">➡ E</button>
+                            <button class="gravity-btn" onclick="setGravity('south_west')">↙ SW</button>
+                            <button class="gravity-btn" onclick="setGravity('south')">⬇ S</button>
+                            <button class="gravity-btn" onclick="setGravity('south_east')">↘ SE</button>
                         </div>
                     </div>
 
@@ -1121,22 +1119,22 @@
                         <label>Côté du gradient</label>
                         <div class="gradient-side-grid">
                             <button class="side-btn ${gradient.side === 'top' ? 'active' : ''}" onclick="updateGradientSide(${gradient.id}, 'top'); renderGradients()">
-                                Haut
+                                ⬆ Haut
                             </button>
                             <button class="side-btn ${gradient.side === 'bottom' ? 'active' : ''}" onclick="updateGradientSide(${gradient.id}, 'bottom'); renderGradients()">
-                                Bas
+                                ⬇ Bas
                             </button>
                             <button class="side-btn ${gradient.side === 'left' ? 'active' : ''}" onclick="updateGradientSide(${gradient.id}, 'left'); renderGradients()">
-                                Gauche
+                                ⬅ Gauche
                             </button>
                             <button class="side-btn ${gradient.side === 'right' ? 'active' : ''}" onclick="updateGradientSide(${gradient.id}, 'right'); renderGradients()">
-                                Droite
+                                ➡ Droite
                             </button>
                             <button class="side-btn ${gradient.side === 'horizontal' ? 'active' : ''}" onclick="updateGradientSide(${gradient.id}, 'horizontal'); renderGradients()">
-                                Horizontal
+                                ↔ Horizontal
                             </button>
                             <button class="side-btn ${gradient.side === 'vertical' ? 'active' : ''}" onclick="updateGradientSide(${gradient.id}, 'vertical'); renderGradients()">
-                                Vertical
+                                ↕ Vertical
                             </button>
                         </div>
                     </div>
