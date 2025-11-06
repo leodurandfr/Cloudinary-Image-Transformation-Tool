@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloudinary Transform Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #ffffff;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0;
+            background: white;
+        }
+
+        .header {
+            background: #000000;
+            color: white;
+            padding: 24px 40px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .header p {
+            font-size: 0.875rem;
+            color: #999999;
+            margin: 4px 0 0 0;
+        }
+
+        .main-content {
+            display: flex;
+            gap: 0;
+            min-height: calc(100vh - 73px);
+        }
+
+        .controls-section {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            border-right: 1px solid #e0e0e0;
+        }
+
+        .preview-section {
+            width: 500px;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            padding: 40px;
+            background: #fafafa;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .card {
+            background: #ffffff;
+            border-radius: 4px;
+            padding: 24px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .card h2 {
+            color: #000000;
+            margin: 0 0 20px 0;
+            font-size: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .collapsible-header {
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+            padding: 0;
+            transition: all 0.2s;
+        }
+
+        .collapsible-header:hover h2 {
+            color: #666666;
+        }
+
+        .collapsible-header .arrow {
+            transition: transform 0.2s ease;
+            font-size: 0.875rem;
+            color: #999999;
+            font-weight: 400;
+        }
+
+        .collapsible-header.collapsed .arrow {
+            transform: rotate(-90deg);
+        }
+
+        .collapsible-content {
+            max-height: 2000px;
+            overflow: hidden;
+            transition: max-height 0.2s ease;
+            margin-top: 20px;
+        }
+
+        .collapsible-content.collapsed {
+            max-height: 0;
+            margin-top: 0;
+        }
+
+        .gradient-item {
+            background: #fafafa;
+            border: 1px solid #e0e0e0;
+            border-radius: 2px;
+            padding: 16px;
+            margin-bottom: 12px;
+            position: relative;
+        }
+
+        .gradient-item:hover {
+            border-color: #d0d0d0;
+        }
+
+        .gradient-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .gradient-title {
+            font-weight: 600;
+            color: #495057;
+            font-size: 0.95rem;
+        }
+
+        .gradient-remove {
+            background: #ffffff;
+            color: #000000;
+            border: 1px solid #d0d0d0;
+            padding: 4px 12px;
+            border-radius: 2px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: all 0.15s;
+        }
+
+        .gradient-remove:hover {
+            background: #000000;
+            color: #ffffff;
+            border-color: #000000;
+        }
+
+        .add-gradient-btn {
+            width: 100%;
+            padding: 10px;
+            background: #000000;
+            color: white;
+            border: 1px solid #000000;
+            border-radius: 2px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 400;
+            transition: all 0.15s;
+            margin-top: 10px;
+        }
+
+        .add-gradient-btn:hover {
+            background: #333333;
+            border-color: #333333;
+        }
+
+        .gradient-side-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .side-btn {
+            padding: 8px 12px;
+            border: 1px solid #d0d0d0;
+            background: white;
+            border-radius: 2px;
+            cursor: pointer;
+            transition: all 0.15s;
+            font-size: 0.875rem;
+            font-weight: 400;
+        }
+
+        .side-btn:hover {
+            border-color: #000000;
+            background: white;
+        }
+
+        .side-btn.active {
+            background: #000000;
+            color: white;
+            border-color: #000000;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            color: #333333;
+            font-weight: 400;
+            font-size: 0.8125rem;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #d0d0d0;
+            border-radius: 2px;
+            font-size: 0.875rem;
+            background: white;
+            transition: all 0.15s;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #000000;
+            box-shadow: none;
+        }
+
+        .dimension-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .aspect-ratio-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .aspect-btn {
+            padding: 8px 12px;
+            border: 2px solid #dee2e6;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .aspect-btn:hover {
+            border-color: #667eea;
+            background: #f8f9fa;
+        }
+
+        .aspect-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+        }
+
+        .gravity-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .gravity-btn {
+            padding: 8px 16px;
+            border: 1px solid #d0d0d0;
+            background: white;
+            border-radius: 2px;
+            cursor: pointer;
+            transition: all 0.15s;
+            font-weight: 400;
+            font-size: 0.875rem;
+        }
+
+        .gravity-btn:hover {
+            border-color: #000000;
+            background: white;
+        }
+
+        .gravity-btn.active {
+            background: #000000;
+            color: white;
+            border-color: #000000;
+        }
+
+        .preview-container {
+            width: 100%;
+            min-height: 300px;
+            border: 1px solid #e0e0e0;
+            border-radius: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #ffffff;
+            overflow: hidden;
+        }
+
+        .preview-container img {
+            max-width: 100%;
+            max-height: 600px;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .preview-placeholder {
+            text-align: center;
+            color: #adb5bd;
+        }
+
+        .preview-placeholder svg {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        .url-output {
+            background: #fafafa;
+            padding: 12px;
+            border-radius: 2px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.75rem;
+            word-break: break-all;
+            border: 1px solid #e0e0e0;
+            min-height: 60px;
+            color: #333333;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            padding: 6px 12px;
+            background: #000000;
+            color: white;
+            border: 1px solid #000000;
+            border-radius: 2px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: all 0.15s;
+        }
+
+        .copy-btn:hover {
+            background: #333333;
+        }
+
+        .copy-btn.copied {
+            background: #666666;
+        }
+
+        .toggle-section {
+            margin-top: 10px;
+        }
+
+        .toggle-header {
+            cursor: pointer;
+            padding: 12px;
+            background: #e9ecef;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s;
+        }
+
+        .toggle-header:hover {
+            background: #dee2e6;
+        }
+
+        .toggle-content {
+            margin-top: 15px;
+            display: none;
+        }
+
+        .toggle-content.active {
+            display: block;
+        }
+
+        .effects-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .effect-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            background: white;
+            border: 1px solid #d0d0d0;
+            border-radius: 2px;
+            cursor: pointer;
+            transition: all 0.15s;
+            font-size: 0.875rem;
+        }
+
+        .effect-checkbox:hover {
+            border-color: #000000;
+            background: white;
+        }
+
+        .effect-checkbox input {
+            cursor: pointer;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                flex-direction: column;
+            }
+            .preview-section {
+                width: 100%;
+                position: relative;
+                height: auto;
+            }
+        }
+
+        .info-badge {
+            display: inline-block;
+            background: #f0f0f0;
+            color: #666666;
+            padding: 2px 8px;
+            border-radius: 2px;
+            font-size: 0.75rem;
+            font-weight: 400;
+            margin-left: 8px;
+        }
+
+        .reset-btn {
+            width: 100%;
+            padding: 10px;
+            background: #000000;
+            color: white;
+            border: 1px solid #000000;
+            border-radius: 2px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 400;
+            transition: all 0.15s;
+            margin-top: 10px;
+        }
+
+        .reset-btn:hover {
+            background: #333333;
+            border-color: #333333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Cloudinary Transform Tool</h1>
+            <p>Générateur de transformations d'images en temps réel</p>
+        </div>
+
+        <div class="main-content">
+            <!-- Controls Section -->
+            <div class="controls-section">
+                <!-- URL Input -->
+                <div class="card">
+                    <h2>URL de l'image</h2>
+                    <div class="input-group">
+                        <label for="imageUrl">Collez votre URL Cloudinary</label>
+                        <input 
+                            type="text" 
+                            id="imageUrl" 
+                            placeholder="https://www.chanel.com/images/..."
+                            value=""
+                        >
+                    </div>
+                    <button class="reset-btn" onclick="resetAll()">Réinitialiser</button>
+                </div>
+
+                <!-- Crop Mode -->
+                <div class="card">
+                    <div class="collapsible-header" onclick="toggleCollapse(this)">
+                        <h2 style="margin-bottom: 0;">Mode de recadrage</h2>
+                        <span class="arrow">▼</span>
+                    </div>
+                    <div class="collapsible-content">
+                        <div class="input-group">
+                            <label for="cropMode">Crop Mode</label>
+                            <select id="cropMode" onchange="updateTransform()">
+                                <option value="">Aucun</option>
+                                <option value="fill">Fill - Remplir les dimensions</option>
+                                <option value="lfill">Limit Fill - Fill limité</option>
+                                <option value="crop">Crop - Rogner</option>
+                                <option value="thumb">Thumb - Miniature</option>
+                                <option value="auto">Auto - Automatique</option>
+                                <option value="scale">Scale - Redimensionner</option>
+                                <option value="fit">Fit - Ajuster</option>
+                                <option value="limit">Limit - Limiter</option>
+                                <option value="mfit">Min Fit - Ajustement minimum</option>
+                                <option value="pad">Pad - Avec padding</option>
+                                <option value="lpad">Limit Pad - Pad limité</option>
+                                <option value="mpad">Min Pad - Pad minimum</option>
+                            </select>
+                        </div>
+
+                        <!-- Trim Effect -->
+                        <div class="input-group" style="margin-top: 15px;">
+                            <label class="effect-checkbox">
+                                <input type="checkbox" id="trimCheckbox" value="trim" onchange="toggleTrimOptions(); updateTransform()">
+                                <span>Trim - Supprimer les bords</span>
+                            </label>
+                            <div style="font-size: 0.75rem; color: #666; margin-top: 4px;">
+                                Détecte et supprime les bords dont la couleur est similaire aux pixels des coins
+                            </div>
+                        </div>
+
+                        <!-- Trim Options -->
+                        <div id="trimOptions" style="display: none; margin-top: 15px; padding: 15px; background: #f5f5f5; border-radius: 2px; border: 1px solid #e0e0e0;">
+                            <div class="input-group">
+                                <label for="trimTolerance">Tolérance (0-100)</label>
+                                <input
+                                    type="number"
+                                    id="trimTolerance"
+                                    placeholder="10"
+                                    min="0"
+                                    max="100"
+                                    onchange="updateTransform()"
+                                >
+                                <div style="font-size: 0.75rem; color: #666; margin-top: 4px;">
+                                    Défaut: 10. Plus élevé = plus de couleurs similaires seront supprimées
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <label for="trimColor">Couleur à trim (optionnel)</label>
+                                <input
+                                    type="text"
+                                    id="trimColor"
+                                    placeholder="Ex: yellow, #FF0000"
+                                    onchange="updateTransform()"
+                                >
+                                <div style="font-size: 0.75rem; color: #666; margin-top: 4px;">
+                                    Par défaut, utilise la couleur des pixels des coins
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dimensions -->
+                <div class="card">
+                    <div class="collapsible-header" onclick="toggleCollapse(this)">
+                        <h2 style="margin-bottom: 0;">Dimensions</h2>
+                        <span class="arrow">▼</span>
+                    </div>
+                    <div class="collapsible-content">
+                        <div class="input-group">
+                        <label>Largeur & Hauteur (pixels)</label>
+                        <div class="dimension-inputs">
+                            <input 
+                                type="number" 
+                                id="width" 
+                                placeholder="Largeur"
+                                onchange="updateTransform()"
+                            >
+                            <input 
+                                type="number" 
+                                id="height" 
+                                placeholder="Hauteur"
+                                onchange="updateTransform()"
+                            >
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Ratio d'aspect prédéfinis</label>
+                        <div class="aspect-ratio-buttons">
+                            <button class="aspect-btn" onclick="setAspectRatio('1:1', event)">1:1</button>
+                            <button class="aspect-btn" onclick="setAspectRatio('4:3', event)">4:3</button>
+                            <button class="aspect-btn" onclick="setAspectRatio('16:9', event)">16:9</button>
+                            <button class="aspect-btn" onclick="setAspectRatio('3:2', event)">3:2</button>
+                        </div>
+                    </div>
+
+                        <div class="input-group">
+                            <label for="aspectRatio">Ratio personnalisé (ex: 1.5 ou 16:9)</label>
+                            <input
+                                type="text"
+                                id="aspectRatio"
+                                placeholder="1.0 ou 16:9"
+                                onchange="updateTransform()"
+                            >
+                            <div style="background: #f5f5f5; padding: 8px; border-radius: 2px; font-size: 0.75rem; color: #666666; margin-top: 8px; border: 1px solid #e0e0e0;">
+                                Note: L'aspect ratio ajoute automatiquement le mode "Fill" si aucun mode de crop n'est sélectionné
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gravity -->
+                <div class="card">
+                    <div class="collapsible-header" onclick="toggleCollapse(this)">
+                        <h2 style="margin-bottom: 0;">Gravité (point focal)</h2>
+                        <span class="arrow">▼</span>
+                    </div>
+                    <div class="collapsible-content">
+                    <div class="input-group">
+                        <label>Position compass</label>
+                        <div class="gravity-grid">
+                            <button class="gravity-btn" onclick="setGravity('north_west')">↖ NW</button>
+                            <button class="gravity-btn" onclick="setGravity('north')">⬆ N</button>
+                            <button class="gravity-btn" onclick="setGravity('north_east')">↗ NE</button>
+                            <button class="gravity-btn" onclick="setGravity('west')">⬅ W</button>
+                            <button class="gravity-btn" onclick="setGravity('center')">⊙ C</button>
+                            <button class="gravity-btn" onclick="setGravity('east')">➡ E</button>
+                            <button class="gravity-btn" onclick="setGravity('south_west')">↙ SW</button>
+                            <button class="gravity-btn" onclick="setGravity('south')">⬇ S</button>
+                            <button class="gravity-btn" onclick="setGravity('south_east')">↘ SE</button>
+                        </div>
+                    </div>
+
+                    <div class="input-group" style="margin-top: 15px;">
+                        <label for="gravitySpecial">Gravité spéciale</label>
+                        <select id="gravitySpecial" onchange="setGravity(this.value)">
+                            <option value="">Aucune</option>
+                            <optgroup label="Auto Gravity">
+                                <option value="auto">Auto - Optimal (AI + Saillance)</option>
+                                <option value="auto:subject">Auto:Subject - Focus sur sujet (AI)</option>
+                                <option value="auto:classic">Auto:Classic - Saillance classique</option>
+                                <option value="auto:object">Auto:Object - Focus objet détecté</option>
+                            </optgroup>
+                            <optgroup label="Face Detection">
+                                <option value="face">Face - Visage unique</option>
+                                <option value="faces">Faces - Plusieurs visages</option>
+                                <option value="auto:face">Auto:Face - Auto sur visage</option>
+                                <option value="auto:faces">Auto:Faces - Auto sur visages</option>
+                            </optgroup>
+                            <optgroup label="Advanced">
+                                <option value="auto:subject:thirds_0">Auto:Subject (centré)</option>
+                                <option value="auto:classic:thirds_0">Auto:Classic (centré)</option>
+                                <option value="auto:face_avoid">Auto (éviter visages)</option>
+                            </optgroup>
+                        </select>
+                        <div style="font-size: 0.75rem; color: #666; margin-top: 8px;">
+                            <strong>Subject</strong>: meilleur pour portraits/produits | <strong>Classic</strong>: meilleur pour paysages | <strong>thirds_0</strong>: désactive la règle des tiers
+                        </div>
+                    </div>
+                    </div>
+                </div>
+
+                <!-- Gradient -->
+                <div class="card">
+                    <div class="collapsible-header" onclick="toggleCollapse(this)">
+                        <h2 style="margin-bottom: 0;">Gradient Fade <span class="info-badge" id="gradientCount">0</span></h2>
+                        <span class="arrow">▼</span>
+                    </div>
+                    <div class="collapsible-content">
+                        <div id="gradientsList"></div>
+
+                        <button class="add-gradient-btn" onclick="addGradient()">
+                            Ajouter un gradient
+                        </button>
+
+                        <div style="background: #f5f5f5; padding: 12px; border-radius: 2px; font-size: 0.75rem; color: #666666; margin-top: 15px;">
+                            <strong>Astuces:</strong>
+                            <ul style="margin: 8px 0 0 20px; line-height: 1.6;">
+                                <li><strong>Côtés:</strong> Haut/Bas/Gauche/Droite pour un seul côté</li>
+                                <li><strong>Horizontal:</strong> Fade symétrique gauche et droite</li>
+                                <li><strong>Vertical:</strong> Fade symétrique haut et bas</li>
+                                <li><strong>Intensité:</strong> 0.5 = 50% de l'image avec gradient</li>
+                                <li><strong>Plusieurs gradients:</strong> Chaque gradient s'applique indépendamment</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Effects -->
+                <div class="card">
+                    <div class="collapsible-header" onclick="toggleCollapse(this)">
+                        <h2 style="margin-bottom: 0;">Effets & Qualité</h2>
+                        <span class="arrow">▼</span>
+                    </div>
+                    <div class="collapsible-content">
+                    
+                    <div class="toggle-section">
+                        <div class="toggle-header" onclick="toggleSection('effects')">
+                            <span>Effets visuels</span>
+                            <span>▼</span>
+                        </div>
+                        <div id="effects" class="toggle-content">
+                            <div class="effects-grid">
+                                <label class="effect-checkbox">
+                                    <input type="checkbox" value="grayscale" onchange="updateTransform()">
+                                    <span>Grayscale</span>
+                                </label>
+                                <label class="effect-checkbox">
+                                    <input type="checkbox" value="sharpen" onchange="updateTransform()">
+                                    <span>Sharpen</span>
+                                </label>
+                                <label class="effect-checkbox">
+                                    <input type="checkbox" value="upscale" onchange="updateTransform()">
+                                    <span>Upscale</span>
+                                </label>
+                                <label class="effect-checkbox">
+                                    <input type="checkbox" value="gen_restore" onchange="updateTransform()">
+                                    <span>Gen Restore</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="input-group" style="margin-top: 15px;">
+                        <label for="quality">Qualité</label>
+                        <select id="quality" onchange="updateTransform()">
+                            <option value="">Par défaut</option>
+                            <option value="auto">Auto</option>
+                            <option value="auto:best">Auto:Best</option>
+                            <option value="auto:good">Auto:Good</option>
+                            <option value="auto:eco">Auto:Eco</option>
+                            <option value="auto:low">Auto:Low</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="format">Format</label>
+                        <select id="format" onchange="updateTransform()">
+                            <option value="">Original</option>
+                            <option value="auto">Auto</option>
+                            <option value="jpg">JPEG</option>
+                            <option value="png">PNG</option>
+                            <option value="webp">WebP</option>
+                            <option value="avif">AVIF</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="dpr">DPR (Device Pixel Ratio)</label>
+                        <select id="dpr" onchange="updateTransform()">
+                            <option value="">Par défaut</option>
+                            <option value="1.0">1.0</option>
+                            <option value="1.5">1.5</option>
+                            <option value="2.0">2.0</option>
+                            <option value="3.0">3.0</option>
+                            <option value="auto">Auto</option>
+                        </select>
+                    </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preview Section -->
+            <div class="preview-section">
+                <!-- Preview -->
+                <div class="card">
+                    <h2>Aperçu <span class="info-badge">Live</span></h2>
+                    <div class="preview-container" id="previewContainer">
+                        <div class="preview-placeholder">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                <polyline points="21 15 16 10 5 21"></polyline>
+                            </svg>
+                            <p>Collez une URL d'image pour voir l'aperçu</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Generated URL -->
+                <div class="card">
+                    <h2>URL générée</h2>
+                    <div style="position: relative;">
+                        <div class="url-output" id="urlOutput">
+                            Aucune URL générée
+                        </div>
+                        <button class="copy-btn" id="copyBtn" onclick="copyUrl()">Copier</button>
+                    </div>
+                </div>
+
+                <!-- Info -->
+                <div class="card" style="background: #e7f3ff; border-color: #b3d9ff;">
+                    <h2>Informations</h2>
+                    <ul style="margin-left: 20px; color: #004080; line-height: 1.8;">
+                        <li>L'aperçu se met à jour en temps réel</li>
+                        <li>Compatible avec les URLs Chanel et Cloudinary standards</li>
+                        <li>Tous les paramètres sont optionnels</li>
+                        <li>Les transformations sont cumulables</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentUrl = '';
+        let baseUrl = '';
+        let publicId = '';
+        let currentGravity = '';
+        let gradients = [];
+        let gradientIdCounter = 0;
+
+        // Initialize
+        document.getElementById('imageUrl').addEventListener('input', function(e) {
+            parseUrl(e.target.value);
+            updateTransform();
+        });
+
+        function parseUrl(url) {
+            if (!url) {
+                currentUrl = '';
+                baseUrl = '';
+                publicId = '';
+                return;
+            }
+
+            currentUrl = url;
+
+            // Parse Chanel URLs
+            if (url.includes('chanel.com/images')) {
+                const parts = url.split('/images/');
+                baseUrl = parts[0] + '/images/';
+                
+                // Extract public ID (filename)
+                const remaining = parts[1];
+                const pathParts = remaining.split('/');
+                publicId = pathParts[pathParts.length - 1];
+            } 
+            // Parse standard Cloudinary URLs
+            else if (url.includes('res.cloudinary.com')) {
+                const match = url.match(/(https:\/\/res\.cloudinary\.com\/[^\/]+\/[^\/]+\/[^\/]+\/)/);
+                if (match) {
+                    baseUrl = match[1];
+                    publicId = url.split('/').pop();
+                }
+            }
+            // Generic URL
+            else {
+                const urlParts = url.split('/');
+                publicId = urlParts.pop();
+                baseUrl = urlParts.join('/') + '/';
+            }
+        }
+
+        function buildTransformUrl() {
+            if (!currentUrl) return '';
+
+            const transforms = [];
+
+            // Crop mode
+            const cropMode = document.getElementById('cropMode').value;
+            const width = document.getElementById('width').value;
+            const height = document.getElementById('height').value;
+            const aspectRatio = document.getElementById('aspectRatio').value;
+
+            let cropParams = [];
+            
+            if (cropMode) {
+                cropParams.push(`c_${cropMode}`);
+            }
+            
+            if (width) {
+                cropParams.push(`w_${width}`);
+            }
+            
+            if (height) {
+                cropParams.push(`h_${height}`);
+            }
+            
+            if (aspectRatio) {
+                // Aspect ratio requires a crop mode
+                if (!cropMode) {
+                    // Auto-add fill mode if no crop mode is set
+                    cropParams.push('c_fill');
+                }
+                cropParams.push(`ar_${aspectRatio}`);
+            }
+
+            if (currentGravity) {
+                cropParams.push(`g_${currentGravity}`);
+            }
+
+            if (cropParams.length > 0) {
+                transforms.push(cropParams.join(','));
+            }
+
+            // Trim Effect (from Crop section) - Applied BEFORE gradient to trim the image first
+            const trimCheckbox = document.getElementById('trimCheckbox');
+            if (trimCheckbox && trimCheckbox.checked) {
+                // Build e_trim with optional parameters
+                let trimParams = ['e_trim'];
+                const tolerance = document.getElementById('trimTolerance').value;
+                const color = document.getElementById('trimColor').value;
+
+                if (tolerance || color) {
+                    let params = [];
+                    if (tolerance) params.push(tolerance);
+                    if (color) params.push(color);
+                    trimParams.push(params.join(':'));
+                }
+                transforms.push(trimParams.join(':'));
+            }
+
+            // Gradient Fade - Multiple gradients support
+            gradients.forEach(gradient => {
+                let gradientParams = [];
+
+                // Determine gradient type and parameters based on side
+                switch(gradient.side) {
+                    case 'top':
+                        gradientParams.push('e_gradient_fade');
+                        gradientParams.push(`y_${gradient.intensity}`);
+                        break;
+                    case 'bottom':
+                        gradientParams.push('e_gradient_fade');
+                        gradientParams.push(`y_-${gradient.intensity}`);
+                        break;
+                    case 'left':
+                        gradientParams.push('e_gradient_fade');
+                        gradientParams.push(`x_${gradient.intensity}`);
+                        break;
+                    case 'right':
+                        gradientParams.push('e_gradient_fade');
+                        gradientParams.push(`x_-${gradient.intensity}`);
+                        break;
+                    case 'horizontal':
+                        if (gradient.strength && gradient.strength !== 20) {
+                            gradientParams.push(`e_gradient_fade:symmetric:${gradient.strength}`);
+                        } else {
+                            gradientParams.push('e_gradient_fade:symmetric');
+                        }
+                        gradientParams.push(`x_${gradient.intensity}`);
+                        break;
+                    case 'vertical':
+                        if (gradient.strength && gradient.strength !== 20) {
+                            gradientParams.push(`e_gradient_fade:symmetric:${gradient.strength}`);
+                        } else {
+                            gradientParams.push('e_gradient_fade:symmetric');
+                        }
+                        gradientParams.push(`y_${gradient.intensity}`);
+                        break;
+                }
+
+                if (gradientParams.length > 0) {
+                    transforms.push(gradientParams.join(','));
+                }
+            });
+
+            // Effects
+            const effectCheckboxes = document.querySelectorAll('.effect-checkbox input:checked');
+            effectCheckboxes.forEach(cb => {
+                if (cb.value === 'trim') {
+                    // Skip trim - it's now handled in the Crop section above
+                    return;
+                } else if (cb.value === 'upscale') {
+                    transforms.push(`e_upscale`);
+                } else if (cb.value === 'gen_restore') {
+                    transforms.push(`e_gen_restore`);
+                } else {
+                    transforms.push(`e_${cb.value}`);
+                }
+            });
+
+            // Quality
+            const quality = document.getElementById('quality').value;
+            if (quality) {
+                transforms.push(`q_${quality}`);
+            }
+
+            // Format
+            const format = document.getElementById('format').value;
+            if (format) {
+                transforms.push(`f_${format}`);
+            }
+
+            // DPR
+            const dpr = document.getElementById('dpr').value;
+            if (dpr) {
+                transforms.push(`dpr_${dpr}`);
+            }
+
+            // Build final URL
+            if (transforms.length === 0) {
+                return currentUrl;
+            }
+
+            const transformString = transforms.join('/');
+            return baseUrl + transformString + '/' + publicId;
+        }
+
+        function updateTransform() {
+            const newUrl = buildTransformUrl();
+            
+            // Update URL output
+            document.getElementById('urlOutput').textContent = newUrl || 'Aucune URL générée';
+
+            // Update preview
+            const previewContainer = document.getElementById('previewContainer');
+            if (newUrl) {
+                previewContainer.innerHTML = `<img src="${newUrl}" alt="Preview" onerror="this.src=''; this.alt='Erreur de chargement'">`;
+            } else {
+                previewContainer.innerHTML = `
+                    <div class="preview-placeholder">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                            <polyline points="21 15 16 10 5 21"></polyline>
+                        </svg>
+                        <p>Collez une URL d'image pour voir l'aperçu</p>
+                    </div>
+                `;
+            }
+        }
+
+        function setAspectRatio(ratio, event) {
+            document.getElementById('aspectRatio').value = ratio;
+
+            // Update button states
+            document.querySelectorAll('.aspect-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
+
+            updateTransform();
+        }
+
+        function setGravity(gravity) {
+            currentGravity = gravity;
+
+            // Update button states
+            document.querySelectorAll('.gravity-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            if (event.target.classList.contains('gravity-btn')) {
+                event.target.classList.add('active');
+            }
+
+            // Reset special gravity select if compass was clicked
+            if (gravity && !gravity.includes('auto') && !gravity.includes('face')) {
+                document.getElementById('gravitySpecial').value = '';
+            }
+
+            updateTransform();
+        }
+
+        function addGradient() {
+            const id = gradientIdCounter++;
+            const gradient = {
+                id: id,
+                side: 'top',
+                intensity: 0.5,
+                strength: 20
+            };
+            gradients.push(gradient);
+            renderGradients();
+            updateTransform();
+        }
+
+        function removeGradient(id) {
+            gradients = gradients.filter(g => g.id !== id);
+            renderGradients();
+            updateTransform();
+        }
+
+        function updateGradientSide(id, side) {
+            const gradient = gradients.find(g => g.id === id);
+            if (gradient) {
+                gradient.side = side;
+                updateTransform();
+            }
+        }
+
+        function updateGradientIntensity(id, intensity) {
+            const gradient = gradients.find(g => g.id === id);
+            if (gradient) {
+                gradient.intensity = parseFloat(intensity);
+                document.getElementById(`intensity-value-${id}`).textContent = intensity;
+                updateTransform();
+            }
+        }
+
+        function updateGradientStrength(id, strength) {
+            const gradient = gradients.find(g => g.id === id);
+            if (gradient) {
+                gradient.strength = parseInt(strength);
+                document.getElementById(`strength-value-${id}`).textContent = strength;
+                updateTransform();
+            }
+        }
+
+        function renderGradients() {
+            const container = document.getElementById('gradientsList');
+            const countBadge = document.getElementById('gradientCount');
+
+            countBadge.textContent = gradients.length;
+
+            if (gradients.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #adb5bd; padding: 20px;">Aucun gradient. Cliquez sur "Ajouter un gradient" pour commencer.</p>';
+                return;
+            }
+
+            container.innerHTML = gradients.map(gradient => `
+                <div class="gradient-item">
+                    <div class="gradient-header">
+                        <span class="gradient-title">Gradient #${gradient.id + 1}</span>
+                        <button class="gradient-remove" onclick="removeGradient(${gradient.id})">Supprimer</button>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Côté du gradient</label>
+                        <div class="gradient-side-grid">
+                            <button class="side-btn ${gradient.side === 'top' ? 'active' : ''}" onclick="updateGradientSide(${gradient.id}, 'top'); renderGradients()">
+                                ⬆ Haut
+                            </button>
+                            <button class="side-btn ${gradient.side === 'bottom' ? 'active' : ''}" onclick="updateGradientSide(${gradient.id}, 'bottom'); renderGradients()">
+                                ⬇ Bas
+                            </button>
+                            <button class="side-btn ${gradient.side === 'left' ? 'active' : ''}" onclick="updateGradientSide(${gradient.id}, 'left'); renderGradients()">
+                                ⬅ Gauche
+                            </button>
+                            <button class="side-btn ${gradient.side === 'right' ? 'active' : ''}" onclick="updateGradientSide(${gradient.id}, 'right'); renderGradients()">
+                                ➡ Droite
+                            </button>
+                            <button class="side-btn ${gradient.side === 'horizontal' ? 'active' : ''}" onclick="updateGradientSide(${gradient.id}, 'horizontal'); renderGradients()">
+                                ↔ Horizontal
+                            </button>
+                            <button class="side-btn ${gradient.side === 'vertical' ? 'active' : ''}" onclick="updateGradientSide(${gradient.id}, 'vertical'); renderGradients()">
+                                ↕ Vertical
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Intensité du fade: <span id="intensity-value-${gradient.id}">${gradient.intensity}</span></label>
+                        <input
+                            type="range"
+                            min="0"
+                            max="1"
+                            step="0.05"
+                            value="${gradient.intensity}"
+                            oninput="updateGradientIntensity(${gradient.id}, this.value)"
+                            style="width: 100%;"
+                        >
+                        <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #6c757d; margin-top: 5px;">
+                            <span>0% (0)</span>
+                            <span>50% (0.5)</span>
+                            <span>100% (1)</span>
+                        </div>
+                    </div>
+
+                    <div class="input-group" ${gradient.side !== 'horizontal' && gradient.side !== 'vertical' ? 'style="display: none;"' : ''}>
+                        <label>Force du gradient (Strength): <span id="strength-value-${gradient.id}">${gradient.strength}</span></label>
+                        <input
+                            type="range"
+                            min="0"
+                            max="100"
+                            step="5"
+                            value="${gradient.strength}"
+                            oninput="updateGradientStrength(${gradient.id}, this.value)"
+                            style="width: 100%;"
+                        >
+                        <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #6c757d; margin-top: 5px;">
+                            <span>Faible (0)</span>
+                            <span>Défaut (20)</span>
+                            <span>Fort (100)</span>
+                        </div>
+                        <div style="background: #f5f5f5; padding: 8px; border-radius: 2px; font-size: 0.8rem; color: #666; margin-top: 8px; border: 1px solid #e0e0e0;">
+                            La force s'applique uniquement aux gradients Horizontal et Vertical
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleCollapse(header) {
+            const content = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+
+            header.classList.toggle('collapsed');
+            content.classList.toggle('collapsed');
+        }
+
+        function copyUrl() {
+            const urlText = document.getElementById('urlOutput').textContent;
+            const copyBtn = document.getElementById('copyBtn');
+            
+            navigator.clipboard.writeText(urlText).then(() => {
+                copyBtn.textContent = '✓ Copié !';
+                copyBtn.classList.add('copied');
+                
+                setTimeout(() => {
+                    copyBtn.textContent = 'Copier';
+                    copyBtn.classList.remove('copied');
+                }, 2000);
+            });
+        }
+
+        function toggleSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            section.classList.toggle('active');
+
+            const header = section.previousElementSibling;
+            const arrow = header.querySelector('span:last-child');
+            arrow.textContent = section.classList.contains('active') ? '▲' : '▼';
+        }
+
+        function toggleTrimOptions() {
+            const trimCheckbox = document.getElementById('trimCheckbox');
+            const trimOptions = document.getElementById('trimOptions');
+
+            if (trimCheckbox.checked) {
+                trimOptions.style.display = 'block';
+            } else {
+                trimOptions.style.display = 'none';
+            }
+        }
+
+        function resetAll() {
+            document.getElementById('imageUrl').value = '';
+            document.getElementById('cropMode').value = '';
+            document.getElementById('width').value = '';
+            document.getElementById('height').value = '';
+            document.getElementById('aspectRatio').value = '';
+            document.getElementById('gravitySpecial').value = '';
+            document.getElementById('quality').value = '';
+            document.getElementById('format').value = '';
+            document.getElementById('dpr').value = '';
+            document.getElementById('trimTolerance').value = '';
+            document.getElementById('trimColor').value = '';
+
+            currentGravity = '';
+            currentUrl = '';
+            baseUrl = '';
+            publicId = '';
+            gradients = [];
+            gradientIdCounter = 0;
+
+            document.querySelectorAll('.aspect-btn, .gravity-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            document.querySelectorAll('.effect-checkbox input').forEach(cb => {
+                cb.checked = false;
+            });
+
+            document.getElementById('trimOptions').style.display = 'none';
+
+            renderGradients();
+            updateTransform();
+        }
+
+        // Initialize gradients display on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            renderGradients();
+        });
+
+        // Add example URLs for testing
+        setTimeout(() => {
+            const exampleUrl = 'https://www.chanel.com/images//t_one///q_auto:good,f_autoplus,fl_lossy,dpr_1.1/w_1240/camelia-bloom-supple-cuff-white-white-gold-diamond-packshot-default-j13524-9580730875934.jpg';
+            console.log('💡 Exemple d\'URL à tester:', exampleUrl);
+        }, 1000);
+    </script>
+</body>
+</html>
