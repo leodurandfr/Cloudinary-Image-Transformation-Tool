@@ -479,9 +479,18 @@
             if (url.includes('chanel.com/images')) {
                 const parts = url.split('/images/');
                 baseUrl = parts[0] + '/images/';
+
+                // Extract public ID (filename) from the end
                 const remaining = parts[1];
                 const pathParts = remaining.split('/');
                 publicId = pathParts[pathParts.length - 1];
+
+                // Check if there's a template prefix (like t_one///)
+                // If so, include it in baseUrl
+                const firstPart = pathParts[0];
+                if (firstPart && firstPart.startsWith('t_')) {
+                    baseUrl += firstPart + '///';
+                }
             }
             // Parse standard Cloudinary URLs
             else if (url.includes('res.cloudinary.com')) {
