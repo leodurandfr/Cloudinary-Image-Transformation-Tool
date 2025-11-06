@@ -59,23 +59,14 @@
         }
 
         .preview-section {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            position: relative;
-        }
-
-        .preview-sticky {
             position: -webkit-sticky;
             position: sticky;
             top: 20px;
             z-index: 100;
-        }
-
-        @supports (position: sticky) {
-            .preview-sticky {
-                align-self: flex-start;
-            }
+            align-self: flex-start;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
         }
 
         .card {
@@ -727,7 +718,7 @@
             <!-- Preview Section -->
             <div class="preview-section">
                 <!-- Preview -->
-                <div class="card preview-sticky">
+                <div class="card">
                     <h2>Aperçu <span class="info-badge">Live</span></h2>
                     <div class="preview-container" id="previewContainer">
                         <div class="preview-placeholder">
