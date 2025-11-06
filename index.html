@@ -646,12 +646,27 @@
                         <label for="gravitySpecial">Gravité spéciale</label>
                         <select id="gravitySpecial" onchange="setGravity(this.value)">
                             <option value="">Aucune</option>
-                            <option value="auto">Auto - Automatique</option>
-                            <option value="face">Face - Visage</option>
-                            <option value="faces">Faces - Plusieurs visages</option>
-                            <option value="auto:face">Auto:Face - Auto sur visage</option>
-                            <option value="auto:faces">Auto:Faces - Auto sur visages</option>
+                            <optgroup label="Auto Gravity">
+                                <option value="auto">Auto - Optimal (AI + Saillance)</option>
+                                <option value="auto:subject">Auto:Subject - Focus sur sujet (AI)</option>
+                                <option value="auto:classic">Auto:Classic - Saillance classique</option>
+                                <option value="auto:object">Auto:Object - Focus objet détecté</option>
+                            </optgroup>
+                            <optgroup label="Face Detection">
+                                <option value="face">Face - Visage unique</option>
+                                <option value="faces">Faces - Plusieurs visages</option>
+                                <option value="auto:face">Auto:Face - Auto sur visage</option>
+                                <option value="auto:faces">Auto:Faces - Auto sur visages</option>
+                            </optgroup>
+                            <optgroup label="Advanced">
+                                <option value="auto:subject:thirds_0">Auto:Subject (centré)</option>
+                                <option value="auto:classic:thirds_0">Auto:Classic (centré)</option>
+                                <option value="auto:face_avoid">Auto (éviter visages)</option>
+                            </optgroup>
                         </select>
+                        <div style="font-size: 0.75rem; color: #666; margin-top: 8px;">
+                            <strong>Subject</strong>: meilleur pour portraits/produits | <strong>Classic</strong>: meilleur pour paysages | <strong>thirds_0</strong>: désactive la règle des tiers
+                        </div>
                     </div>
                     </div>
                 </div>
