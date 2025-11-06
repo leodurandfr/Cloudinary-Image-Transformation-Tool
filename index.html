@@ -129,6 +129,95 @@
             opacity: 0;
         }
 
+        .gradient-item {
+            background: white;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .gradient-item:hover {
+            border-color: #667eea;
+        }
+
+        .gradient-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .gradient-title {
+            font-weight: 600;
+            color: #495057;
+            font-size: 0.95rem;
+        }
+
+        .gradient-remove {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .gradient-remove:hover {
+            background: #c82333;
+        }
+
+        .add-gradient-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.2s;
+            margin-top: 10px;
+        }
+
+        .add-gradient-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .gradient-side-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .side-btn {
+            padding: 8px 12px;
+            border: 2px solid #dee2e6;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .side-btn:hover {
+            border-color: #667eea;
+            background: #f8f9fa;
+        }
+
+        .side-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+        }
+
         .input-group {
             margin-bottom: 15px;
         }
@@ -526,88 +615,26 @@
                 <!-- Gradient -->
                 <div class="card">
                     <div class="collapsible-header" onclick="toggleCollapse(this)">
-                        <h2 style="margin-bottom: 0;">Gradient Fade</h2>
+                        <h2 style="margin-bottom: 0;">Gradient Fade <span class="info-badge" id="gradientCount">0</span></h2>
                         <span class="arrow">▼</span>
                     </div>
                     <div class="collapsible-content">
-                    <div class="input-group">
-                        <label for="gradientType">Type de gradient</label>
-                        <select id="gradientType" onchange="updateGradientVisibility(); updateTransform()">
-                            <option value="">Aucun</option>
-                            <option value="standard">Standard</option>
-                            <option value="symmetric">Symétrique</option>
-                            <option value="symmetric_pad">Symétrique avec padding</option>
-                        </select>
-                    </div>
+                        <div id="gradientsList"></div>
 
-                    <div id="gradientControls" style="display: none;">
-                        <div class="input-group">
-                            <label for="gradientX">Direction horizontale (X): <span id="gradientXValue">0</span></label>
-                            <input
-                                type="range"
-                                id="gradientX"
-                                min="-1"
-                                max="1"
-                                step="0.1"
-                                value="0"
-                                oninput="updateGradientValue('X'); updateTransform()"
-                                style="width: 100%;"
-                            >
-                            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #6c757d; margin-top: 5px;">
-                                <span>← Droite</span>
-                                <span>Aucun</span>
-                                <span>Gauche →</span>
-                            </div>
-                        </div>
+                        <button class="add-gradient-btn" onclick="addGradient()">
+                            ➕ Ajouter un gradient
+                        </button>
 
-                        <div class="input-group">
-                            <label for="gradientY">Direction verticale (Y): <span id="gradientYValue">0</span></label>
-                            <input
-                                type="range"
-                                id="gradientY"
-                                min="-1"
-                                max="1"
-                                step="0.1"
-                                value="0"
-                                oninput="updateGradientValue('Y'); updateTransform()"
-                                style="width: 100%;"
-                            >
-                            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #6c757d; margin-top: 5px;">
-                                <span>← Bas</span>
-                                <span>Aucun</span>
-                                <span>Haut →</span>
-                            </div>
-                        </div>
-
-                        <div class="input-group" id="strengthControl" style="display: none;">
-                            <label for="gradientStrength">Force du mélange (Strength): <span id="gradientStrengthValue">20</span></label>
-                            <input
-                                type="range"
-                                id="gradientStrength"
-                                min="0"
-                                max="100"
-                                step="5"
-                                value="20"
-                                oninput="updateGradientValue('Strength'); updateTransform()"
-                                style="width: 100%;"
-                            >
-                            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #6c757d; margin-top: 5px;">
-                                <span>Faible (0)</span>
-                                <span>Défaut (20)</span>
-                                <span>Fort (100)</span>
-                            </div>
-                        </div>
-
-                        <div style="background: #e7f3ff; padding: 12px; border-radius: 8px; font-size: 0.85rem; color: #004080; margin-top: 10px;">
-                            <strong>💡 Astuce:</strong>
+                        <div style="background: #e7f3ff; padding: 12px; border-radius: 8px; font-size: 0.85rem; color: #004080; margin-top: 15px;">
+                            <strong>💡 Astuces:</strong>
                             <ul style="margin: 8px 0 0 20px; line-height: 1.6;">
-                                <li>Valeurs positives: fade depuis le haut/gauche</li>
-                                <li>Valeurs négatives: fade depuis le bas/droite</li>
-                                <li>0.5 = 50% de l'image avec gradient</li>
-                                <li>Vous pouvez combiner X et Y pour des gradients symétriques</li>
+                                <li><strong>Côtés:</strong> Haut/Bas/Gauche/Droite pour un seul côté</li>
+                                <li><strong>Horizontal:</strong> Fade symétrique gauche et droite</li>
+                                <li><strong>Vertical:</strong> Fade symétrique haut et bas</li>
+                                <li><strong>Intensité:</strong> 0.5 = 50% de l'image avec gradient</li>
+                                <li><strong>Plusieurs gradients:</strong> Chaque gradient s'applique indépendamment</li>
                             </ul>
                         </div>
-                    </div>
                     </div>
                 </div>
 
@@ -732,6 +759,8 @@
         let baseUrl = '';
         let publicId = '';
         let currentGravity = '';
+        let gradients = [];
+        let gradientIdCounter = 0;
 
         // Initialize
         document.getElementById('imageUrl').addEventListener('input', function(e) {
@@ -812,39 +841,42 @@
                 transforms.push(cropParams.join(','));
             }
 
-            // Gradient Fade
-            const gradientType = document.getElementById('gradientType').value;
-            if (gradientType) {
+            // Gradient Fade - Multiple gradients support
+            gradients.forEach(gradient => {
                 let gradientParams = [];
 
-                if (gradientType === 'standard') {
-                    gradientParams.push('e_gradient_fade');
-                } else if (gradientType === 'symmetric') {
-                    gradientParams.push('e_gradient_fade:symmetric');
-                } else if (gradientType === 'symmetric_pad') {
-                    const strength = document.getElementById('gradientStrength').value;
-                    if (strength && strength !== '20') {
-                        gradientParams.push(`e_gradient_fade:symmetric_pad:${strength}`);
-                    } else {
-                        gradientParams.push('e_gradient_fade:symmetric_pad');
-                    }
-                }
-
-                // Add X and Y parameters if set
-                const gradientX = parseFloat(document.getElementById('gradientX').value);
-                const gradientY = parseFloat(document.getElementById('gradientY').value);
-
-                if (gradientX !== 0) {
-                    gradientParams.push(`x_${gradientX}`);
-                }
-                if (gradientY !== 0) {
-                    gradientParams.push(`y_${gradientY}`);
+                // Determine gradient type and parameters based on side
+                switch(gradient.side) {
+                    case 'top':
+                        gradientParams.push('e_gradient_fade');
+                        gradientParams.push(`y_${gradient.intensity}`);
+                        break;
+                    case 'bottom':
+                        gradientParams.push('e_gradient_fade');
+                        gradientParams.push(`y_-${gradient.intensity}`);
+                        break;
+                    case 'left':
+                        gradientParams.push('e_gradient_fade');
+                        gradientParams.push(`x_${gradient.intensity}`);
+                        break;
+                    case 'right':
+                        gradientParams.push('e_gradient_fade');
+                        gradientParams.push(`x_-${gradient.intensity}`);
+                        break;
+                    case 'horizontal':
+                        gradientParams.push('e_gradient_fade:symmetric');
+                        gradientParams.push(`x_${gradient.intensity}`);
+                        break;
+                    case 'vertical':
+                        gradientParams.push('e_gradient_fade:symmetric');
+                        gradientParams.push(`y_${gradient.intensity}`);
+                        break;
                 }
 
                 if (gradientParams.length > 0) {
                     transforms.push(gradientParams.join(','));
                 }
-            }
+            });
 
             // Effects
             const effectCheckboxes = document.querySelectorAll('.effect-checkbox input:checked');
@@ -941,27 +973,102 @@
             updateTransform();
         }
 
-        function updateGradientVisibility() {
-            const gradientType = document.getElementById('gradientType').value;
-            const gradientControls = document.getElementById('gradientControls');
-            const strengthControl = document.getElementById('strengthControl');
+        function addGradient() {
+            const id = gradientIdCounter++;
+            const gradient = {
+                id: id,
+                side: 'top',
+                intensity: 0.5
+            };
+            gradients.push(gradient);
+            renderGradients();
+            updateTransform();
+        }
 
-            if (gradientType && gradientType !== '') {
-                gradientControls.style.display = 'block';
-                // Show strength control only for symmetric_pad
-                if (gradientType === 'symmetric_pad') {
-                    strengthControl.style.display = 'block';
-                } else {
-                    strengthControl.style.display = 'none';
-                }
-            } else {
-                gradientControls.style.display = 'none';
+        function removeGradient(id) {
+            gradients = gradients.filter(g => g.id !== id);
+            renderGradients();
+            updateTransform();
+        }
+
+        function updateGradientSide(id, side) {
+            const gradient = gradients.find(g => g.id === id);
+            if (gradient) {
+                gradient.side = side;
+                updateTransform();
             }
         }
 
-        function updateGradientValue(axis) {
-            const value = document.getElementById('gradient' + axis).value;
-            document.getElementById('gradient' + axis + 'Value').textContent = value;
+        function updateGradientIntensity(id, intensity) {
+            const gradient = gradients.find(g => g.id === id);
+            if (gradient) {
+                gradient.intensity = parseFloat(intensity);
+                document.getElementById(`intensity-value-${id}`).textContent = intensity;
+                updateTransform();
+            }
+        }
+
+        function renderGradients() {
+            const container = document.getElementById('gradientsList');
+            const countBadge = document.getElementById('gradientCount');
+
+            countBadge.textContent = gradients.length;
+
+            if (gradients.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #adb5bd; padding: 20px;">Aucun gradient. Cliquez sur "Ajouter un gradient" pour commencer.</p>';
+                return;
+            }
+
+            container.innerHTML = gradients.map(gradient => `
+                <div class="gradient-item">
+                    <div class="gradient-header">
+                        <span class="gradient-title">Gradient #${gradient.id + 1}</span>
+                        <button class="gradient-remove" onclick="removeGradient(${gradient.id})">🗑️ Supprimer</button>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Côté du gradient</label>
+                        <div class="gradient-side-grid">
+                            <button class="side-btn ${gradient.side === 'top' ? 'active' : ''}" onclick="updateGradientSide(${gradient.id}, 'top'); renderGradients()">
+                                ↑ Haut
+                            </button>
+                            <button class="side-btn ${gradient.side === 'bottom' ? 'active' : ''}" onclick="updateGradientSide(${gradient.id}, 'bottom'); renderGradients()">
+                                ↓ Bas
+                            </button>
+                            <button class="side-btn ${gradient.side === 'left' ? 'active' : ''}" onclick="updateGradientSide(${gradient.id}, 'left'); renderGradients()">
+                                ← Gauche
+                            </button>
+                            <button class="side-btn ${gradient.side === 'right' ? 'active' : ''}" onclick="updateGradientSide(${gradient.id}, 'right'); renderGradients()">
+                                → Droite
+                            </button>
+                            <button class="side-btn ${gradient.side === 'horizontal' ? 'active' : ''}" onclick="updateGradientSide(${gradient.id}, 'horizontal'); renderGradients()">
+                                ↔ Horizontal
+                            </button>
+                            <button class="side-btn ${gradient.side === 'vertical' ? 'active' : ''}" onclick="updateGradientSide(${gradient.id}, 'vertical'); renderGradients()">
+                                ↕ Vertical
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Intensité du fade: <span id="intensity-value-${gradient.id}">${gradient.intensity}</span></label>
+                        <input
+                            type="range"
+                            min="0"
+                            max="1"
+                            step="0.05"
+                            value="${gradient.intensity}"
+                            oninput="updateGradientIntensity(${gradient.id}, this.value)"
+                            style="width: 100%;"
+                        >
+                        <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #6c757d; margin-top: 5px;">
+                            <span>0% (0)</span>
+                            <span>50% (0.5)</span>
+                            <span>100% (1)</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
         }
 
         function toggleCollapse(header) {
@@ -1003,13 +1110,6 @@
             document.getElementById('height').value = '';
             document.getElementById('aspectRatio').value = '';
             document.getElementById('gravitySpecial').value = '';
-            document.getElementById('gradientType').value = '';
-            document.getElementById('gradientX').value = '0';
-            document.getElementById('gradientY').value = '0';
-            document.getElementById('gradientStrength').value = '20';
-            document.getElementById('gradientXValue').textContent = '0';
-            document.getElementById('gradientYValue').textContent = '0';
-            document.getElementById('gradientStrengthValue').textContent = '20';
             document.getElementById('quality').value = '';
             document.getElementById('format').value = '';
             document.getElementById('dpr').value = '';
@@ -1018,6 +1118,8 @@
             currentUrl = '';
             baseUrl = '';
             publicId = '';
+            gradients = [];
+            gradientIdCounter = 0;
 
             document.querySelectorAll('.aspect-btn, .gravity-btn').forEach(btn => {
                 btn.classList.remove('active');
@@ -1027,9 +1129,14 @@
                 cb.checked = false;
             });
 
-            updateGradientVisibility();
+            renderGradients();
             updateTransform();
         }
+
+        // Initialize gradients display on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            renderGradients();
+        });
 
         // Add example URLs for testing
         setTimeout(() => {
