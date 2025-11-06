@@ -460,6 +460,69 @@
                     </div>
                 </div>
 
+                <!-- Gradient -->
+                <div class="card">
+                    <h2>Gradient Fade</h2>
+                    <div class="input-group">
+                        <label for="gradientType">Type de gradient</label>
+                        <select id="gradientType" onchange="updateGradientVisibility(); updateTransform()">
+                            <option value="">Aucun</option>
+                            <option value="standard">Standard</option>
+                            <option value="symmetric">Symétrique</option>
+                            <option value="symmetric_pad">Symétrique avec padding</option>
+                        </select>
+                    </div>
+
+                    <div id="gradientControls" style="display: none;">
+                        <div class="input-group">
+                            <label for="gradientX">Direction horizontale (X): <span id="gradientXValue">0</span></label>
+                            <input
+                                type="range"
+                                id="gradientX"
+                                min="-1"
+                                max="1"
+                                step="0.1"
+                                value="0"
+                                oninput="updateGradientValue('X'); updateTransform()"
+                                style="width: 100%;"
+                            >
+                            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #6c757d; margin-top: 5px;">
+                                <span>← Droite</span>
+                                <span>Aucun</span>
+                                <span>Gauche →</span>
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="gradientY">Direction verticale (Y): <span id="gradientYValue">0</span></label>
+                            <input
+                                type="range"
+                                id="gradientY"
+                                min="-1"
+                                max="1"
+                                step="0.1"
+                                value="0"
+                                oninput="updateGradientValue('Y'); updateTransform()"
+                                style="width: 100%;"
+                            >
+                            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #6c757d; margin-top: 5px;">
+                                <span>← Bas</span>
+                                <span>Aucun</span>
+                                <span>Haut →</span>
+                            </div>
+                        </div>
+
+                        <div style="background: #e7f3ff; padding: 12px; border-radius: 8px; font-size: 0.85rem; color: #004080; margin-top: 10px;">
+                            <strong>💡 Astuce:</strong>
+                            <ul style="margin: 8px 0 0 20px; line-height: 1.6;">
+                                <li>Valeurs positives: fade depuis le haut/gauche</li>
+                                <li>Valeurs négatives: fade depuis le bas/droite</li>
+                                <li>0.5 = 50% de l'image avec gradient</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Effects -->
                 <div class="card">
                     <h2>Effets & Qualité</h2>
@@ -656,6 +719,35 @@
                 transforms.push(cropParams.join(','));
             }
 
+            // Gradient Fade
+            const gradientType = document.getElementById('gradientType').value;
+            if (gradientType) {
+                let gradientParams = [];
+
+                if (gradientType === 'standard') {
+                    gradientParams.push('e_gradient_fade');
+                } else if (gradientType === 'symmetric') {
+                    gradientParams.push('e_gradient_fade:symmetric');
+                } else if (gradientType === 'symmetric_pad') {
+                    gradientParams.push('e_gradient_fade:symmetric_pad');
+                }
+
+                // Add X and Y parameters if set
+                const gradientX = parseFloat(document.getElementById('gradientX').value);
+                const gradientY = parseFloat(document.getElementById('gradientY').value);
+
+                if (gradientX !== 0) {
+                    gradientParams.push(`x_${gradientX}`);
+                }
+                if (gradientY !== 0) {
+                    gradientParams.push(`y_${gradientY}`);
+                }
+
+                if (gradientParams.length > 0) {
+                    transforms.push(gradientParams.join(','));
+                }
+            }
+
             // Effects
             const effectCheckboxes = document.querySelectorAll('.effect-checkbox input:checked');
             effectCheckboxes.forEach(cb => {
@@ -733,22 +825,38 @@
 
         function setGravity(gravity) {
             currentGravity = gravity;
-            
+
             // Update button states
             document.querySelectorAll('.gravity-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
-            
+
             if (event.target.classList.contains('gravity-btn')) {
                 event.target.classList.add('active');
             }
-            
+
             // Reset special gravity select if compass was clicked
             if (gravity && !gravity.includes('auto') && !gravity.includes('face')) {
                 document.getElementById('gravitySpecial').value = '';
             }
-            
+
             updateTransform();
+        }
+
+        function updateGradientVisibility() {
+            const gradientType = document.getElementById('gradientType').value;
+            const gradientControls = document.getElementById('gradientControls');
+
+            if (gradientType && gradientType !== '') {
+                gradientControls.style.display = 'block';
+            } else {
+                gradientControls.style.display = 'none';
+            }
+        }
+
+        function updateGradientValue(axis) {
+            const value = document.getElementById('gradient' + axis).value;
+            document.getElementById('gradient' + axis + 'Value').textContent = value;
         }
 
         function copyUrl() {
@@ -782,23 +890,29 @@
             document.getElementById('height').value = '';
             document.getElementById('aspectRatio').value = '';
             document.getElementById('gravitySpecial').value = '';
+            document.getElementById('gradientType').value = '';
+            document.getElementById('gradientX').value = '0';
+            document.getElementById('gradientY').value = '0';
+            document.getElementById('gradientXValue').textContent = '0';
+            document.getElementById('gradientYValue').textContent = '0';
             document.getElementById('quality').value = '';
             document.getElementById('format').value = '';
             document.getElementById('dpr').value = '';
-            
+
             currentGravity = '';
             currentUrl = '';
             baseUrl = '';
             publicId = '';
-            
+
             document.querySelectorAll('.aspect-btn, .gravity-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
-            
+
             document.querySelectorAll('.effect-checkbox input').forEach(cb => {
                 cb.checked = false;
             });
-            
+
+            updateGradientVisibility();
             updateTransform();
         }
 
