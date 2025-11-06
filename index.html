@@ -64,9 +64,11 @@
         }
 
         .preview-sticky {
+            position: -webkit-sticky;
             position: sticky;
             top: 20px;
-            z-index: 10;
+            z-index: 100;
+            align-self: flex-start;
         }
 
         .card {
@@ -557,10 +559,10 @@
                     <div class="input-group">
                         <label>Ratio d'aspect prédéfinis</label>
                         <div class="aspect-ratio-buttons">
-                            <button class="aspect-btn" onclick="setAspectRatio('1:1')">1:1</button>
-                            <button class="aspect-btn" onclick="setAspectRatio('4:3')">4:3</button>
-                            <button class="aspect-btn" onclick="setAspectRatio('16:9')">16:9</button>
-                            <button class="aspect-btn" onclick="setAspectRatio('3:2')">3:2</button>
+                            <button class="aspect-btn" onclick="setAspectRatio('1:1', event)">1:1</button>
+                            <button class="aspect-btn" onclick="setAspectRatio('4:3', event)">4:3</button>
+                            <button class="aspect-btn" onclick="setAspectRatio('16:9', event)">16:9</button>
+                            <button class="aspect-btn" onclick="setAspectRatio('3:2', event)">3:2</button>
                         </div>
                     </div>
 
@@ -864,11 +866,19 @@
                         gradientParams.push(`x_-${gradient.intensity}`);
                         break;
                     case 'horizontal':
-                        gradientParams.push('e_gradient_fade:symmetric');
+                        if (gradient.strength && gradient.strength !== 20) {
+                            gradientParams.push(`e_gradient_fade:symmetric:${gradient.strength}`);
+                        } else {
+                            gradientParams.push('e_gradient_fade:symmetric');
+                        }
                         gradientParams.push(`x_${gradient.intensity}`);
                         break;
                     case 'vertical':
-                        gradientParams.push('e_gradient_fade:symmetric');
+                        if (gradient.strength && gradient.strength !== 20) {
+                            gradientParams.push(`e_gradient_fade:symmetric:${gradient.strength}`);
+                        } else {
+                            gradientParams.push('e_gradient_fade:symmetric');
+                        }
                         gradientParams.push(`y_${gradient.intensity}`);
                         break;
                 }
@@ -941,15 +951,17 @@
             }
         }
 
-        function setAspectRatio(ratio) {
+        function setAspectRatio(ratio, event) {
             document.getElementById('aspectRatio').value = ratio;
-            
+
             // Update button states
             document.querySelectorAll('.aspect-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
-            event.target.classList.add('active');
-            
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
+
             updateTransform();
         }
 
@@ -978,7 +990,8 @@
             const gradient = {
                 id: id,
                 side: 'top',
-                intensity: 0.5
+                intensity: 0.5,
+                strength: 20
             };
             gradients.push(gradient);
             renderGradients();
@@ -1004,6 +1017,15 @@
             if (gradient) {
                 gradient.intensity = parseFloat(intensity);
                 document.getElementById(`intensity-value-${id}`).textContent = intensity;
+                updateTransform();
+            }
+        }
+
+        function updateGradientStrength(id, strength) {
+            const gradient = gradients.find(g => g.id === id);
+            if (gradient) {
+                gradient.strength = parseInt(strength);
+                document.getElementById(`strength-value-${id}`).textContent = strength;
                 updateTransform();
             }
         }
@@ -1065,6 +1087,27 @@
                             <span>0% (0)</span>
                             <span>50% (0.5)</span>
                             <span>100% (1)</span>
+                        </div>
+                    </div>
+
+                    <div class="input-group" ${gradient.side !== 'horizontal' && gradient.side !== 'vertical' ? 'style="display: none;"' : ''}>
+                        <label>Force du gradient (Strength): <span id="strength-value-${gradient.id}">${gradient.strength}</span></label>
+                        <input
+                            type="range"
+                            min="0"
+                            max="100"
+                            step="5"
+                            value="${gradient.strength}"
+                            oninput="updateGradientStrength(${gradient.id}, this.value)"
+                            style="width: 100%;"
+                        >
+                        <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #6c757d; margin-top: 5px;">
+                            <span>Faible (0)</span>
+                            <span>Défaut (20)</span>
+                            <span>Fort (100)</span>
+                        </div>
+                        <div style="background: #fff3cd; padding: 8px; border-radius: 6px; font-size: 0.8rem; color: #856404; margin-top: 8px;">
+                            ℹ️ La force s'applique uniquement aux gradients Horizontal et Vertical
                         </div>
                     </div>
                 </div>
