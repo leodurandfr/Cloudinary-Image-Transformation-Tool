@@ -486,10 +486,16 @@
                 publicId = pathParts[pathParts.length - 1];
 
                 // Check if there's a template prefix (like t_one///)
-                // If so, include it in baseUrl
-                const firstPart = pathParts[0];
-                if (firstPart && firstPart.startsWith('t_')) {
-                    baseUrl += firstPart + '///';
+                // Handle both /t_one/// and //t_one/// cases
+                // Find first non-empty part that starts with 't_'
+                const templatePart = pathParts.find(part => part && part.startsWith('t_'));
+                if (templatePart) {
+                    // Check if there's a leading slash (double slash case)
+                    const hasDoubleSlash = remaining.startsWith('/');
+                    if (hasDoubleSlash) {
+                        baseUrl += '/';
+                    }
+                    baseUrl += templatePart + '///';
                 }
             }
             // Parse standard Cloudinary URLs
