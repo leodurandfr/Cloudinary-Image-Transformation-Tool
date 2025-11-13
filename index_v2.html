@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloudinary Transform Tool v2</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #ffffff;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0;
+            background: white;
+        }
+
+        .header {
+            background: #000000;
+            color: white;
+            padding: 24px 40px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .header p {
+            font-size: 0.875rem;
+            color: #999999;
+            margin: 4px 0 0 0;
+        }
+
+        .main-content {
+            display: flex;
+            gap: 0;
+            min-height: calc(100vh - 73px);
+        }
+
+        .controls-section {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            border-right: 1px solid #e0e0e0;
+        }
+
+        .preview-section {
+            width: 500px;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            padding: 40px;
+            background: #fafafa;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* Block Palette Styles */
+        .block-palette {
+            background: #f8f9fa;
+            border: 2px dashed #d0d0d0;
+            border-radius: 4px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .block-palette h3 {
+            color: #333;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 15px;
+        }
+
+        .palette-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 10px;
+        }
+
+        .add-block-btn {
+            padding: 10px 16px;
+            background: #ffffff;
+            color: #333;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            transition: all 0.15s;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .add-block-btn:hover {
+            background: #000000;
+            color: #ffffff;
+            border-color: #000000;
+        }
+
+        .add-block-btn::before {
+            content: '+';
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        /* Transformation Blocks Styles */
+        .blocks-container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            min-height: 200px;
+        }
+
+        .blocks-container-empty {
+            text-align: center;
+            color: #adb5bd;
+            padding: 60px 20px;
+            border: 2px dashed #e0e0e0;
+            border-radius: 4px;
+        }
+
+        .transformation-block {
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+
+        .transformation-block:hover {
+            border-color: #999999;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .block-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: #fafafa;
+            border-bottom: 1px solid #e0e0e0;
+            cursor: pointer;
+        }
+
+        .block-header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+
+        .block-order {
+            background: #000000;
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .block-title {
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: #333;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .block-controls {
+            display: flex;
+            gap: 4px;
+        }
+
+        .block-control-btn {
+            width: 28px;
+            height: 28px;
+            border: 1px solid #d0d0d0;
+            background: white;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .block-control-btn:hover {
+            background: #f0f0f0;
+            border-color: #999;
+        }
+
+        .block-control-btn.danger:hover {
+            background: #dc3545;
+            border-color: #dc3545;
+            color: white;
+        }
+
+        .block-control-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .block-content {
+            padding: 16px;
+            display: none;
+        }
+
+        .block-content.expanded {
+            display: block;
+        }
+
+        .block-preview {
+            font-family: 'Courier New', monospace;
+            font-size: 0.75rem;
+            color: #666;
+            background: #f5f5f5;
+            padding: 8px 12px;
+            border-radius: 3px;
+            margin-top: 10px;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            color: #333;
+            font-weight: 500;
+            font-size: 0.8125rem;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="number"],
+        .form-group select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #d0d0d0;
+            border-radius: 3px;
+            font-size: 0.875rem;
+            background: white;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #000000;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .card {
+            background: #ffffff;
+            border-radius: 4px;
+            padding: 24px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .card h2 {
+            color: #000000;
+            margin: 0 0 20px 0;
+            font-size: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .preview-container {
+            width: 100%;
+            min-height: 300px;
+            border: 1px solid #e0e0e0;
+            border-radius: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #ffffff;
+            overflow: hidden;
+        }
+
+        .preview-container img {
+            max-width: 100%;
+            max-height: 600px;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .url-output {
+            background: #fafafa;
+            padding: 12px;
+            border-radius: 2px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.75rem;
+            word-break: break-all;
+            border: 1px solid #e0e0e0;
+            min-height: 60px;
+            color: #333333;
+        }
+
+        .copy-btn {
+            margin-top: 10px;
+            padding: 8px 16px;
+            background: #000000;
+            color: white;
+            border: none;
+            border-radius: 2px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: all 0.15s;
+            width: 100%;
+        }
+
+        .copy-btn:hover {
+            background: #333333;
+        }
+
+        .info-badge {
+            display: inline-block;
+            background: #f0f0f0;
+            color: #666666;
+            padding: 2px 8px;
+            border-radius: 2px;
+            font-size: 0.75rem;
+            font-weight: 400;
+            margin-left: 8px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 6px;
+            color: #333333;
+            font-weight: 400;
+            font-size: 0.8125rem;
+        }
+
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #d0d0d0;
+            border-radius: 2px;
+            font-size: 0.875rem;
+            background: white;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                flex-direction: column;
+            }
+            .preview-section {
+                width: 100%;
+                position: relative;
+                height: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Cloudinary Transform Tool v2</h1>
+            <p>Système de blocs réorganisables pour transformations avancées</p>
+        </div>
+
+        <div class="main-content">
+            <!-- Controls Section -->
+            <div class="controls-section">
+                <!-- URL Input -->
+                <div class="card">
+                    <h2>URL de l'image</h2>
+                    <div class="input-group">
+                        <label for="imageUrl">Collez votre URL Cloudinary</label>
+                        <input
+                            type="text"
+                            id="imageUrl"
+                            placeholder="https://www.chanel.com/images/..."
+                            onchange="parseUrl(this.value); updatePreview()"
+                        >
+                    </div>
+                </div>
+
+                <!-- Block Palette -->
+                <div class="block-palette">
+                    <h3>📦 Blocs disponibles - Cliquez pour ajouter</h3>
+                    <div class="palette-buttons">
+                        <button class="add-block-btn" onclick="addBlock('crop')">Crop/Resize</button>
+                        <button class="add-block-btn" onclick="addBlock('trim')">Trim</button>
+                        <button class="add-block-btn" onclick="addBlock('gradient')">Gradient Fade</button>
+                        <button class="add-block-btn" onclick="addBlock('effects')">Effects</button>
+                        <button class="add-block-btn" onclick="addBlock('quality')">Quality</button>
+                        <button class="add-block-btn" onclick="addBlock('format')">Format</button>
+                        <button class="add-block-btn" onclick="addBlock('dpr')">DPR</button>
+                    </div>
+                </div>
+
+                <!-- Active Blocks Container -->
+                <div class="card">
+                    <h2>⚙️ Transformations appliquées <span class="info-badge" id="blockCount">0</span></h2>
+                    <div id="blocksContainer" class="blocks-container">
+                        <div class="blocks-container-empty">
+                            <p>Aucune transformation active</p>
+                            <p style="font-size: 0.75rem; margin-top: 8px;">Cliquez sur un bloc ci-dessus pour commencer</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preview Section -->
+            <div class="preview-section">
+                <!-- Preview -->
+                <div class="card">
+                    <h2>Aperçu <span class="info-badge">Live</span></h2>
+                    <div class="preview-container" id="previewContainer">
+                        <p style="color: #adb5bd;">Collez une URL d'image pour voir l'aperçu</p>
+                    </div>
+                </div>
+
+                <!-- Generated URL -->
+                <div class="card">
+                    <h2>URL générée</h2>
+                    <div class="url-output" id="urlOutput">Aucune URL générée</div>
+                    <button class="copy-btn" onclick="copyUrl()">📋 Copier l'URL</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let baseUrl = '';
+        let publicId = '';
+        let blocks = [];
+        let blockIdCounter = 0;
+
+        // Parse URL
+        function parseUrl(url) {
+            if (!url) {
+                baseUrl = '';
+                publicId = '';
+                return;
+            }
+
+            // Parse Chanel URLs
+            if (url.includes('chanel.com/images')) {
+                const parts = url.split('/images/');
+                baseUrl = parts[0] + '/images/';
+
+                // Extract public ID (filename) from the end
+                const remaining = parts[1];
+                const pathParts = remaining.split('/');
+                publicId = pathParts[pathParts.length - 1];
+
+                // Check if there's a template prefix (like t_one///)
+                // Handle both /t_one/// and //t_one/// cases
+                // Find first non-empty part that starts with 't_'
+                const templatePart = pathParts.find(part => part && part.startsWith('t_'));
+                if (templatePart) {
+                    // Check if there's a leading slash (double slash case)
+                    const hasDoubleSlash = remaining.startsWith('/');
+                    if (hasDoubleSlash) {
+                        baseUrl += '/';
+                    }
+                    baseUrl += templatePart + '///';
+                }
+            }
+            // Parse standard Cloudinary URLs
+            else if (url.includes('res.cloudinary.com')) {
+                const match = url.match(/(https:\/\/res\.cloudinary\.com\/[^\/]+\/[^\/]+\/[^\/]+\/)/);
+                if (match) {
+                    baseUrl = match[1];
+                    publicId = url.split('/').pop();
+                }
+            }
+            // Generic URL
+            else {
+                const urlParts = url.split('/');
+                publicId = urlParts.pop();
+                baseUrl = urlParts.join('/') + '/';
+            }
+        }
+
+        // Add a new block
+        function addBlock(type) {
+            const block = {
+                id: blockIdCounter++,
+                type: type,
+                order: blocks.length,
+                expanded: true,
+                params: getDefaultParams(type)
+            };
+            blocks.push(block);
+            renderBlocks();
+            updatePreview();
+        }
+
+        // Get default parameters for a block type
+        function getDefaultParams(type) {
+            switch(type) {
+                case 'crop':
+                    return { mode: 'fill', width: '', height: '', aspectRatio: '', gravity: '' };
+                case 'trim':
+                    return { tolerance: '', color: '' };
+                case 'gradient':
+                    return { side: 'top', intensity: 0.5, strength: 20 };
+                case 'effects':
+                    return { effects: [] };
+                case 'quality':
+                    return { quality: 'auto' };
+                case 'format':
+                    return { format: 'auto' };
+                case 'dpr':
+                    return { dpr: '2.0' };
+                default:
+                    return {};
+            }
+        }
+
+        // Move block up
+        function moveBlockUp(id) {
+            const index = blocks.findIndex(b => b.id === id);
+            if (index > 0) {
+                [blocks[index], blocks[index - 1]] = [blocks[index - 1], blocks[index]];
+                blocks.forEach((block, i) => block.order = i);
+                renderBlocks();
+                updatePreview();
+            }
+        }
+
+        // Move block down
+        function moveBlockDown(id) {
+            const index = blocks.findIndex(b => b.id === id);
+            if (index < blocks.length - 1) {
+                [blocks[index], blocks[index + 1]] = [blocks[index + 1], blocks[index]];
+                blocks.forEach((block, i) => block.order = i);
+                renderBlocks();
+                updatePreview();
+            }
+        }
+
+        // Remove block
+        function removeBlock(id) {
+            blocks = blocks.filter(b => b.id !== id);
+            blocks.forEach((block, i) => block.order = i);
+            renderBlocks();
+            updatePreview();
+        }
+
+        // Toggle block expansion
+        function toggleBlock(id) {
+            const block = blocks.find(b => b.id === id);
+            if (block) {
+                block.expanded = !block.expanded;
+                renderBlocks();
+            }
+        }
+
+        // Update block parameters
+        function updateBlockParam(id, param, value) {
+            const block = blocks.find(b => b.id === id);
+            if (block) {
+                block.params[param] = value;
+                updatePreview();
+            }
+        }
+
+        // Render all blocks
+        function renderBlocks() {
+            const container = document.getElementById('blocksContainer');
+            const countBadge = document.getElementById('blockCount');
+
+            countBadge.textContent = blocks.length;
+
+            if (blocks.length === 0) {
+                container.innerHTML = `
+                    <div class="blocks-container-empty">
+                        <p>Aucune transformation active</p>
+                        <p style="font-size: 0.75rem; margin-top: 8px;">Cliquez sur un bloc ci-dessus pour commencer</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = blocks.map((block, index) => {
+                const canMoveUp = index > 0;
+                const canMoveDown = index < blocks.length - 1;
+                const preview = generateBlockPreview(block);
+
+                return `
+                    <div class="transformation-block">
+                        <div class="block-header" onclick="toggleBlock(${block.id})">
+                            <div class="block-header-left">
+                                <div class="block-order">${index + 1}</div>
+                                <div class="block-title">${getBlockTitle(block.type)}</div>
+                            </div>
+                            <div class="block-controls" onclick="event.stopPropagation()">
+                                <button class="block-control-btn" onclick="moveBlockUp(${block.id})" ${!canMoveUp ? 'disabled' : ''}>⬆</button>
+                                <button class="block-control-btn" onclick="moveBlockDown(${block.id})" ${!canMoveDown ? 'disabled' : ''}>⬇</button>
+                                <button class="block-control-btn danger" onclick="removeBlock(${block.id})">×</button>
+                            </div>
+                        </div>
+                        <div class="block-content ${block.expanded ? 'expanded' : ''}">
+                            ${renderBlockContent(block)}
+                            ${preview ? `<div class="block-preview">${preview}</div>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Get block title
+        function getBlockTitle(type) {
+            const titles = {
+                'crop': 'Crop/Resize',
+                'trim': 'Trim',
+                'gradient': 'Gradient Fade',
+                'effects': 'Effects',
+                'quality': 'Quality',
+                'format': 'Format',
+                'dpr': 'DPR'
+            };
+            return titles[type] || type;
+        }
+
+        // Render block content based on type
+        function renderBlockContent(block) {
+            switch(block.type) {
+                case 'crop':
+                    return renderCropContent(block);
+                case 'trim':
+                    return renderTrimContent(block);
+                case 'gradient':
+                    return renderGradientContent(block);
+                case 'effects':
+                    return renderEffectsContent(block);
+                case 'quality':
+                    return renderQualityContent(block);
+                case 'format':
+                    return renderFormatContent(block);
+                case 'dpr':
+                    return renderDprContent(block);
+                default:
+                    return '<p>Bloc non configuré</p>';
+            }
+        }
+
+        // Render crop block content
+        function renderCropContent(block) {
+            return `
+                <div class="form-group">
+                    <label>Mode de crop</label>
+                    <select onchange="updateBlockParam(${block.id}, 'mode', this.value)">
+                        <option value="">Aucun</option>
+                        <option value="fill" ${block.params.mode === 'fill' ? 'selected' : ''}>Fill</option>
+                        <option value="crop" ${block.params.mode === 'crop' ? 'selected' : ''}>Crop</option>
+                        <option value="scale" ${block.params.mode === 'scale' ? 'selected' : ''}>Scale</option>
+                        <option value="fit" ${block.params.mode === 'fit' ? 'selected' : ''}>Fit</option>
+                        <option value="pad" ${block.params.mode === 'pad' ? 'selected' : ''}>Pad</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Largeur</label>
+                        <input type="number" value="${block.params.width}" onchange="updateBlockParam(${block.id}, 'width', this.value)" placeholder="800">
+                    </div>
+                    <div class="form-group">
+                        <label>Hauteur</label>
+                        <input type="number" value="${block.params.height}" onchange="updateBlockParam(${block.id}, 'height', this.value)" placeholder="600">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Aspect Ratio</label>
+                    <input type="text" value="${block.params.aspectRatio}" onchange="updateBlockParam(${block.id}, 'aspectRatio', this.value)" placeholder="16:9 ou 1.5">
+                </div>
+                <div class="form-group">
+                    <label>Gravité</label>
+                    <select onchange="updateBlockParam(${block.id}, 'gravity', this.value)">
+                        <option value="">Aucune</option>
+                        <optgroup label="Gravité automatique">
+                            <option value="auto" ${block.params.gravity === 'auto' ? 'selected' : ''}>Auto - Automatique</option>
+                            <option value="auto:subject" ${block.params.gravity === 'auto:subject' ? 'selected' : ''}>Auto:Subject - Sujet principal</option>
+                            <option value="auto:classic" ${block.params.gravity === 'auto:classic' ? 'selected' : ''}>Auto:Classic - Classique</option>
+                            <option value="auto:face" ${block.params.gravity === 'auto:face' ? 'selected' : ''}>Auto:Face - Auto sur visage</option>
+                            <option value="auto:faces" ${block.params.gravity === 'auto:faces' ? 'selected' : ''}>Auto:Faces - Auto sur visages</option>
+                        </optgroup>
+                        <optgroup label="Détection de contenu">
+                            <option value="face" ${block.params.gravity === 'face' ? 'selected' : ''}>Face - Visage</option>
+                            <option value="faces" ${block.params.gravity === 'faces' ? 'selected' : ''}>Faces - Plusieurs visages</option>
+                        </optgroup>
+                        <optgroup label="Positions compass">
+                            <option value="center" ${block.params.gravity === 'center' ? 'selected' : ''}>Center - Centre</option>
+                            <option value="north" ${block.params.gravity === 'north' ? 'selected' : ''}>North - Haut</option>
+                            <option value="south" ${block.params.gravity === 'south' ? 'selected' : ''}>South - Bas</option>
+                            <option value="east" ${block.params.gravity === 'east' ? 'selected' : ''}>East - Droite</option>
+                            <option value="west" ${block.params.gravity === 'west' ? 'selected' : ''}>West - Gauche</option>
+                            <option value="north_east" ${block.params.gravity === 'north_east' ? 'selected' : ''}>North East - Haut Droite</option>
+                            <option value="north_west" ${block.params.gravity === 'north_west' ? 'selected' : ''}>North West - Haut Gauche</option>
+                            <option value="south_east" ${block.params.gravity === 'south_east' ? 'selected' : ''}>South East - Bas Droite</option>
+                            <option value="south_west" ${block.params.gravity === 'south_west' ? 'selected' : ''}>South West - Bas Gauche</option>
+                        </optgroup>
+                    </select>
+                </div>
+            `;
+        }
+
+        // Render trim block content
+        function renderTrimContent(block) {
+            return `
+                <div class="form-group">
+                    <label>Tolérance (0-100)</label>
+                    <input type="number" value="${block.params.tolerance}" onchange="updateBlockParam(${block.id}, 'tolerance', this.value)" placeholder="10" min="0" max="100">
+                </div>
+                <div class="form-group">
+                    <label>Couleur (optionnel)</label>
+                    <input type="text" value="${block.params.color}" onchange="updateBlockParam(${block.id}, 'color', this.value)" placeholder="white, #FF0000">
+                </div>
+            `;
+        }
+
+        // Render gradient block content
+        function renderGradientContent(block) {
+            return `
+                <div class="form-group">
+                    <label>Côté</label>
+                    <select onchange="updateBlockParam(${block.id}, 'side', this.value)">
+                        <option value="top" ${block.params.side === 'top' ? 'selected' : ''}>⬆ Haut</option>
+                        <option value="bottom" ${block.params.side === 'bottom' ? 'selected' : ''}>⬇ Bas</option>
+                        <option value="left" ${block.params.side === 'left' ? 'selected' : ''}>⬅ Gauche</option>
+                        <option value="right" ${block.params.side === 'right' ? 'selected' : ''}>➡ Droite</option>
+                        <option value="horizontal" ${block.params.side === 'horizontal' ? 'selected' : ''}>↔ Horizontal</option>
+                        <option value="vertical" ${block.params.side === 'vertical' ? 'selected' : ''}>↕ Vertical</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Intensité: ${block.params.intensity}</label>
+                    <input type="range" min="0" max="1" step="0.05" value="${block.params.intensity}" onchange="updateBlockParam(${block.id}, 'intensity', this.value); renderBlocks()">
+                </div>
+            `;
+        }
+
+        // Render effects block content
+        function renderEffectsContent(block) {
+            return `
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" ${block.params.effects.includes('grayscale') ? 'checked' : ''} onchange="toggleEffect(${block.id}, 'grayscale', this.checked)">
+                        Grayscale
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" ${block.params.effects.includes('sharpen') ? 'checked' : ''} onchange="toggleEffect(${block.id}, 'sharpen', this.checked)">
+                        Sharpen
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" ${block.params.effects.includes('upscale') ? 'checked' : ''} onchange="toggleEffect(${block.id}, 'upscale', this.checked)">
+                        Upscale
+                    </label>
+                </div>
+            `;
+        }
+
+        // Toggle effect in effects block
+        function toggleEffect(blockId, effect, enabled) {
+            const block = blocks.find(b => b.id === blockId);
+            if (block) {
+                if (enabled) {
+                    if (!block.params.effects.includes(effect)) {
+                        block.params.effects.push(effect);
+                    }
+                } else {
+                    block.params.effects = block.params.effects.filter(e => e !== effect);
+                }
+                updatePreview();
+            }
+        }
+
+        // Render quality block content
+        function renderQualityContent(block) {
+            return `
+                <div class="form-group">
+                    <label>Qualité</label>
+                    <select onchange="updateBlockParam(${block.id}, 'quality', this.value)">
+                        <option value="auto" ${block.params.quality === 'auto' ? 'selected' : ''}>Auto</option>
+                        <option value="auto:best" ${block.params.quality === 'auto:best' ? 'selected' : ''}>Auto:Best</option>
+                        <option value="auto:good" ${block.params.quality === 'auto:good' ? 'selected' : ''}>Auto:Good</option>
+                        <option value="auto:eco" ${block.params.quality === 'auto:eco' ? 'selected' : ''}>Auto:Eco</option>
+                    </select>
+                </div>
+            `;
+        }
+
+        // Render format block content
+        function renderFormatContent(block) {
+            return `
+                <div class="form-group">
+                    <label>Format</label>
+                    <select onchange="updateBlockParam(${block.id}, 'format', this.value)">
+                        <option value="auto" ${block.params.format === 'auto' ? 'selected' : ''}>Auto</option>
+                        <option value="jpg" ${block.params.format === 'jpg' ? 'selected' : ''}>JPEG</option>
+                        <option value="png" ${block.params.format === 'png' ? 'selected' : ''}>PNG</option>
+                        <option value="webp" ${block.params.format === 'webp' ? 'selected' : ''}>WebP</option>
+                        <option value="avif" ${block.params.format === 'avif' ? 'selected' : ''}>AVIF</option>
+                    </select>
+                </div>
+            `;
+        }
+
+        // Render DPR block content
+        function renderDprContent(block) {
+            return `
+                <div class="form-group">
+                    <label>Device Pixel Ratio</label>
+                    <select onchange="updateBlockParam(${block.id}, 'dpr', this.value)">
+                        <option value="1.0" ${block.params.dpr === '1.0' ? 'selected' : ''}>1.0</option>
+                        <option value="1.5" ${block.params.dpr === '1.5' ? 'selected' : ''}>1.5</option>
+                        <option value="2.0" ${block.params.dpr === '2.0' ? 'selected' : ''}>2.0</option>
+                        <option value="3.0" ${block.params.dpr === '3.0' ? 'selected' : ''}>3.0</option>
+                        <option value="auto" ${block.params.dpr === 'auto' ? 'selected' : ''}>Auto</option>
+                    </select>
+                </div>
+            `;
+        }
+
+        // Generate block preview (URL part)
+        function generateBlockPreview(block) {
+            const transforms = generateBlockTransforms(block);
+            return transforms.length > 0 ? transforms.join(',') : null;
+        }
+
+        // Generate transforms for a block
+        function generateBlockTransforms(block) {
+            const transforms = [];
+
+            switch(block.type) {
+                case 'crop':
+                    if (block.params.mode) transforms.push(`c_${block.params.mode}`);
+                    if (block.params.width) transforms.push(`w_${block.params.width}`);
+                    if (block.params.height) transforms.push(`h_${block.params.height}`);
+                    if (block.params.aspectRatio) transforms.push(`ar_${block.params.aspectRatio}`);
+                    if (block.params.gravity) transforms.push(`g_${block.params.gravity}`);
+                    break;
+
+                case 'trim':
+                    let trimParts = ['e_trim'];
+                    if (block.params.tolerance || block.params.color) {
+                        let params = [];
+                        if (block.params.tolerance) params.push(block.params.tolerance);
+                        if (block.params.color) params.push(block.params.color);
+                        trimParts.push(params.join(':'));
+                    }
+                    transforms.push(trimParts.join(':'));
+                    break;
+
+                case 'gradient':
+                    switch(block.params.side) {
+                        case 'top':
+                            transforms.push('e_gradient_fade', `y_${block.params.intensity}`);
+                            break;
+                        case 'bottom':
+                            transforms.push('e_gradient_fade', `y_-${block.params.intensity}`);
+                            break;
+                        case 'left':
+                            transforms.push('e_gradient_fade', `x_${block.params.intensity}`);
+                            break;
+                        case 'right':
+                            transforms.push('e_gradient_fade', `x_-${block.params.intensity}`);
+                            break;
+                        case 'horizontal':
+                            transforms.push('e_gradient_fade:symmetric', `x_${block.params.intensity}`);
+                            break;
+                        case 'vertical':
+                            transforms.push('e_gradient_fade:symmetric', `y_${block.params.intensity}`);
+                            break;
+                    }
+                    break;
+
+                case 'effects':
+                    block.params.effects.forEach(effect => {
+                        transforms.push(`e_${effect}`);
+                    });
+                    break;
+
+                case 'quality':
+                    if (block.params.quality) transforms.push(`q_${block.params.quality}`);
+                    break;
+
+                case 'format':
+                    if (block.params.format) transforms.push(`f_${block.params.format}`);
+                    break;
+
+                case 'dpr':
+                    if (block.params.dpr) transforms.push(`dpr_${block.params.dpr}`);
+                    break;
+            }
+
+            return transforms;
+        }
+
+        // Build full transformation URL
+        function buildTransformUrl() {
+            if (!baseUrl || !publicId) return '';
+
+            const transformComponents = blocks
+                .sort((a, b) => a.order - b.order)
+                .map(block => generateBlockTransforms(block))
+                .filter(transforms => transforms.length > 0)
+                .map(transforms => transforms.join(','));
+
+            if (transformComponents.length === 0) {
+                return baseUrl + publicId;
+            }
+
+            return baseUrl + transformComponents.join('/') + '/' + publicId;
+        }
+
+        // Update preview
+        function updatePreview() {
+            const url = buildTransformUrl();
+            const urlOutput = document.getElementById('urlOutput');
+            const previewContainer = document.getElementById('previewContainer');
+
+            urlOutput.textContent = url || 'Aucune URL générée';
+
+            if (url && baseUrl && publicId) {
+                previewContainer.innerHTML = `<img src="${url}" alt="Preview" onerror="this.src=''; this.alt='Erreur de chargement'">`;
+            } else {
+                previewContainer.innerHTML = `<p style="color: #adb5bd;">Collez une URL d'image pour voir l'aperçu</p>`;
+            }
+        }
+
+        // Copy URL to clipboard
+        function copyUrl() {
+            const urlText = document.getElementById('urlOutput').textContent;
+            navigator.clipboard.writeText(urlText).then(() => {
+                const btn = document.querySelector('.copy-btn');
+                btn.textContent = '✓ Copié !';
+                setTimeout(() => {
+                    btn.textContent = '📋 Copier l\'URL';
+                }, 2000);
+            });
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            renderBlocks();
+        });
+    </script>
+</body>
+</html>
